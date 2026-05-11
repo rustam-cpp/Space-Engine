@@ -1,0 +1,78 @@
+#pragma once
+
+#include "types.h"
+#include "constants.h"
+#include "memory.h"
+
+// a struct for an element of transposition table (TT)
+struct Entry {
+  // evaluation
+  Eval eval;
+  // zobrist hash
+  uint64_t zhash;
+  // depth we reached
+  Depth depth;
+  // flag
+  Bound flag;
+  // constructor
+  Entry() {
+    zhash = 0;
+    eval = -INF;
+    depth = -1;
+    flag = EXACT;
+  }
+};
+
+// ZH - zobrist hash
+
+struct tt {
+  // all the elements
+  Entry* table;
+  // size of this array
+  int size;
+  // constructor
+  tt(int sizeMB) {
+
+    // if sizeMB = 0
+    sizeMB = std::max(sizeMB, 1);
+    
+    // calculating size of array
+    size = 1048576LL * sizeMB / sizeof(Entry);
+    size = 1 << (31 - __builtin_clz(size));
+
+    // creating table
+    table = new Entry[size];
+    std::fill(table, table + size, Entry());
+  }
+
+  inline Entry* probe(uint64_t ZH);
+  
+  inline void store(uint64_t ZH, Depth d, Eval e, Bound f);
+  
+  void clear();
+  // destructor
+  ~tt() {
+    delete[] table;
+  }
+};
+
+inline Entry* tt::probe(uint64_t ZH) {
+  Entry& entry = table[ZH & (size - 1)];
+  if (entry.zhash == ZH) {
+    return &entry;
+  }
+  return nullptr;
+}
+
+inline void tt::store(uint64_t ZH, Depth d, Eval e, Bound f) {
+  // getting current entry
+  Entry& entry = table[ZH & (size - 1)];
+
+  // check, that we can store or replace it
+  if (entry.zhash == 0 || entry.zhash == ZH || d >= entry.depth) {
+    entry.zhash = ZH;
+    entry.depth = d;
+    entry.eval = e;
+    entry.flag = f;
+  }
+}

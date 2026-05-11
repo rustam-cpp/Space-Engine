@@ -1,0 +1,103 @@
+#include "uci.h"
+#include "constants.h"
+#include "converts.h"
+#include "search.h"
+#include "timeman.h"
+
+std::vector<std::string> split(std::string command) {
+  // the final result
+  std::vector<std::string> result;
+  for (char c : command) {
+    // if it's the first word or a new word
+    if (result.empty() || (c == ' ' && result.back() != "")) {
+      // we create a new string
+      result.emplace_back();
+    } else if (result.back() != "" || c != ' ') {
+      // else we add char to last word
+      result.back() += c;
+    }
+  }
+  return result;
+}
+
+void processPositionCommand(Position& pos, std::string command) {
+  std::vector<std::string> cmd = split(command);
+  int i;
+  if (cmd[1] == "startpos") {
+    pos.convertFromFen(StartFen);
+    i = 2;
+  } else {
+    std::string fen = cmd[2] + " "
+                    + cmd[3] + " "
+                    + cmd[4] + " "
+                    + cmd[5] + " "
+                    + cmd[6] + " "
+                    + cmd[7];
+    pos.convertFromFen(fen);
+    i = 8;
+  }
+  if (i < (int)cmd.size() && cmd[i] == "moves") {
+    // we parse all moves from the command
+    while (++i < (int)cmd.size()) {
+      Square From, To;
+      Piece PromotedTo = NONE;
+      From = convertStringToSquare(cmd[i].substr(0, 2));
+      To = convertStringToSquare(cmd[i].substr(2, 2));
+      if (cmd[i].size() == 5) {
+        PromotedTo = convertStringToPiece(cmd[i][4]);
+        // we need this if because all promoted pieces in uci are black.
+        // for example e7e8q, but e7 is a white pawn
+        if (pos.WhiteToMove) PromotedTo = swapColor(PromotedTo);
+      }
+      doMove(pos, makeMove(pos, From, To, PromotedTo));
+    }
+  }
+}
+
+void processGoCommand(Position& pos, tt* TT, std::string command) {
+  Depth maxDepth = 64;
+  // base time, increment
+  long myTime = BIG_INF, myInc = 0;
+  long moveTime = BIG_INF;
+  std::vector<std::string> cmd = split(command);
+  for (int i = 0; i < (int)cmd.size(); i++) {
+    // base time
+    if (cmd[i] == "wtime" && pos.WhiteToMove) {
+      if ((int)cmd.size() >= i)
+        myTime = stol(cmd[i+1]);
+    } else if (cmd[i] == "btime" && !pos.WhiteToMove) {
+      if ((int)cmd.size() >= i)
+        myTime = stol(cmd[i+1]);
+    }
+    // increment
+    if (cmd[i] == "winc" && pos.WhiteToMove) {
+      if ((int)cmd.size() >= i)
+        myInc = stol(cmd[i+1]);
+    } else if (cmd[i] == "binc" && !pos.WhiteToMove) {
+      if ((int)cmd.size() >= i)
+        myInc = stol(cmd[i+1]);
+    }
+    // max depth
+    if (cmd[i] == "depth") {
+      if ((int)cmd.size() >= i)
+        maxDepth = stol(cmd[i+1]);
+    }
+    // move time
+    if (cmd[i] == "movetime") {
+      if ((int)cmd.size() >= i)
+        moveTime = stol(cmd[i+1]);
+    }
+  }
+  Move bestmove;
+  if (moveTime == BIG_INF) {
+    // BestMove, Nodes
+    auto [bm, n] = iterative_depening(pos, TT, maxDepth,
+                   soft_bound(myTime, myInc) - 5,
+                   hard_bound(myTime, myInc) - 5);
+    bestmove = bm;
+  } else {
+    auto [bm, n] = iterative_depening(pos, TT, maxDepth, moveTime - 5, moveTime - 5);
+    bestmove = bm;
+  }
+  std::cout << "bestmove " << convertMoveToString(bestmove) << std::endl;
+}
