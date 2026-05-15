@@ -272,7 +272,7 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
 
   // if it is already mate or stalemate
   if (Bests.empty()) {
-    return {Move(), (inCheck(pos) ? -Mate : 0)};
+    return {Move(), (inCheckOp(pos) ? -Mate : 0)};
   }
 
   // we peak a random move from all the best
