@@ -62,12 +62,6 @@ Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, Depth ply) {
   // static evaluation of position
   Eval eval = evaluation(pos);
 
-  // mate normalization safety
-  if (eval > Mate - 1000)
-    eval -= ply;
-  if (eval < -Mate + 1000)
-    eval += ply;
-
   // fail-high
   if (eval >= b)
     return eval;
@@ -256,12 +250,6 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
 
     // we evaluate current position
     Eval eval = -search(depth - 1, pos, -beta, -alpha, nodes, TT, 0);
-
-    // and if we find checkmate
-    if (abs(eval + Mate) <= 100)
-      eval++;
-    if (abs(eval - Mate) <= 100)
-      eval--;
 
     // if we better than all previous moves
     if (eval > BestEval) {

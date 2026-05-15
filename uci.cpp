@@ -96,7 +96,9 @@ void processGoCommand(Position& pos, tt* TT, std::string command) {
                    hard_bound(myTime, myInc) - 5);
     bestmove = bm;
   } else {
-    auto [bm, n] = iterative_depening(pos, TT, maxDepth, moveTime - 5, moveTime - 5);
+    auto [bm, n] = iterative_depening(pos, TT, maxDepth,
+                   soft_bound_fixed_movetime(moveTime) - 5,
+                   moveTime - 5);
     bestmove = bm;
   }
   std::cout << "bestmove " << convertMoveToString(bestmove) << std::endl;
