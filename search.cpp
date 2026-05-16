@@ -120,11 +120,6 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, D
   // if there is a draw on the board, then you need to return 0
   if (pos.isRepetitionDraw() || pos.isFiftyMoveDraw())
     return 0;
-  
-  // qsearch
-  if (depth <= 0) {
-    return qsearch(pos, a, b, nodes, ply);
-  }
 
   // if we can use TT
   Entry* entry = TT->probe(pos.ZobristHash);
@@ -143,6 +138,11 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, D
       return eval;
     if (entry->flag == UPPER && eval <= a)
       return eval;
+  }
+  
+  // qsearch
+  if (depth <= 0) {
+    return qsearch(pos, a, b, nodes, ply);
   }
 
   // all legal moves
