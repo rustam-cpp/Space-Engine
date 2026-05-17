@@ -19,7 +19,7 @@ int64_t perft(Depth depth, Position pos);
 // returns the score how good or bad the move is
 inline Eval getScore(const Move& move);
 
-inline bool cmp(const Move& m1, const Move& m2);
+void pickMove(std::vector<Move>& moves, int start, const Move& ttMove);
 
 // we cannot use static evaluation if it's a capture
 // or a pawn promotion available in position, so

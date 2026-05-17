@@ -3,6 +3,7 @@
 #include "types.h"
 #include "constants.h"
 #include "memory.h"
+#include "move.h"
 
 // a struct for an element of transposition table (TT)
 struct Entry {
@@ -14,6 +15,8 @@ struct Entry {
   Depth depth;
   // flag
   Bound flag;
+  // tt best move
+  Move bestMove;
   // constructor
   Entry() {
     zhash = 0;
@@ -47,7 +50,7 @@ struct tt {
 
   inline Entry* probe(uint64_t ZH);
   
-  inline void store(uint64_t ZH, Depth d, Eval e, Bound f);
+  inline void store(uint64_t ZH, Depth d, Eval e, Bound f, const Move& m);
   
   void clear();
   // destructor
@@ -64,7 +67,7 @@ inline Entry* tt::probe(uint64_t ZH) {
   return nullptr;
 }
 
-inline void tt::store(uint64_t ZH, Depth d, Eval e, Bound f) {
+inline void tt::store(uint64_t ZH, Depth d, Eval e, Bound f, const Move& m) {
   // getting current entry
   Entry& entry = table[ZH & (size - 1)];
 
@@ -74,5 +77,6 @@ inline void tt::store(uint64_t ZH, Depth d, Eval e, Bound f) {
     entry.depth = d;
     entry.eval = e;
     entry.flag = f;
+    entry.bestMove = m;
   }
 }
