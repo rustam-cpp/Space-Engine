@@ -137,7 +137,7 @@ std::string toLen(int64_t x, int len);
 inline std::string score(Eval eval) {
   // engine mates
   if (eval > Mate - 1000) {
-    return "mate  " + toLen((Mate - eval + 1) / 2, 5);
+    return "mate  " + toLen((Mate - eval + 2) / 2, 5);
   // engine get mated
   } else if (eval < -Mate + 1000) {
     return "mate -" + toLen((eval + Mate + 1) / 2, 5);
