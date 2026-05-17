@@ -10,6 +10,7 @@
 #include <thread>
 
 std::atomic<bool> is_running = false;
+std::atomic<bool> stop = false;
 
 int64_t perft(Depth depth, Position pos) {
   // leaf
@@ -301,6 +302,8 @@ std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, Depth maxDepth
 
   int64_t nodes = 0;
 
+  stop = false;
+
   do {
 
     // new nodes counter
@@ -309,13 +312,26 @@ std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, Depth maxDepth
     is_running = true;
 
     std::future<std::pair<Move, Eval>> result = std::async(search_root, pos, depth, -INF, INF, std::ref(nnodes), TT);
-    while (is_running && (depth == 1 || (end - start) / 1'000'000 <= hard)) {
+
+    while (true) {
+
+      long elapsed = (end - start) / 1'000'000;
+
+      if (!is_running) {
+        break;
+      } else if (stop && depth > 1) {
+        break;
+      } else if (elapsed >= hard && depth > 1) {
+        break;
+      }
+
       end = std::chrono::high_resolution_clock::now().time_since_epoch().count();
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
     }
 
-    // time is up
-    if (is_running) {
+    // time is up  or stop command received
+    if ((is_running || stop) && depth > 1) {
       is_running = false;
       break;
     }
@@ -364,4 +380,8 @@ std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, Depth maxDepth
 
   return {BestMove, nodes};
 
+}
+
+void stopCommand() {
+  stop = true;
 }

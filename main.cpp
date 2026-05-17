@@ -2,7 +2,9 @@
 #include "tt.h"
 #include "uci.h"
 #include "evaluation.h"
+#include "search.h"
 #include <iostream>
+#include <thread>
 
 void info() {
   std::cout << std::endl;
@@ -53,7 +55,10 @@ int main() {
     } else if (command.substr(0, 8) == "position") {
       processPositionCommand(pos, command);
     } else if (command.substr(0, 2) == "go") {
-      processGoCommand(pos, TT, command);
+      std::thread go(processGoCommand, std::ref(pos), TT, command);
+      go.detach();
+    } else if (command == "stop") {
+      stopCommand();
     } else if (command.substr(0, 25) == "setoption name Hash value") {
       std::vector<std::string> cmd = split(command);
       // don't forget to free the allocated memory
