@@ -1,6 +1,7 @@
 #include "search.h"
 #include "constants.h"
 #include "converts.h"
+#include "move.h"
 #include "movegen.h"
 #include "evaluation.h"
 #include "types.h"
@@ -115,7 +116,7 @@ Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, Depth ply) {
     generateMoves<false, true>(pos, moves);
     // the end
     if (moves.empty()) {
-      if (inCheckOp(pos))
+      if (inCheck(pos))
         // checkmate on the board
         return -Mate + ply;
       else
@@ -216,7 +217,7 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, D
   generateMoves<false, false>(pos, moves);
 
   if (moves.empty()) {
-    if (inCheckOp(pos))
+    if (inCheck(pos))
       // checkmate on the board
       return -Mate + ply;
     else
@@ -343,7 +344,7 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
 
   // if it is already mate or stalemate
   if (Bests.empty()) {
-    return {Move(), (inCheckOp(pos) ? -Mate : 0)};
+    return {Move(), (inCheck(pos) ? -Mate : 0)};
   }
 
   // we peak a random move from all the best

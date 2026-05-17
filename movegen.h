@@ -280,7 +280,7 @@ void generatePseudoLegalMoves(const Position& pos, std::vector<std::pair<Bitboar
   }
 }
 
-inline bool inCheck(const Position& pos) {
+inline bool inCheckOp(const Position& pos) {
   // get king square
   Square King = FirstBit(pos.pieces[makePiece((pos.WhiteToMove ? BLACK : WHITE), KING)]);
       // knight attackability check
@@ -324,7 +324,7 @@ inline bool inCheck(const Position& pos) {
   return true;
 }
 
-inline bool inCheckOp(const Position& pos) {
+inline bool inCheck(const Position& pos) {
   // get king square
   Square King = FirstBit(pos.pieces[makePiece((pos.WhiteToMove ? WHITE : BLACK), KING)]);
   if ((knightMoves[King] & pos.pieces[makePiece((pos.WhiteToMove ? BLACK : WHITE), KNIGHT)]) == 0 &&
@@ -376,7 +376,7 @@ void generateMoves(Position pos, std::vector<Move>& moves) {
       Move move = makeMove(pos, S, T, NONE);
       doMove(pos, move);
       // 1.1 check the legality of the move
-      if (!inCheck(pos)) {
+      if (!inCheckOp(pos)) {
         // 1.2. but it can be a promotion
         if (getType(move.Moved) == PAWN && (getRank(move.To) == 0 || getRank(move.To) == 7)) {
           // we can promote to any piece
