@@ -355,21 +355,25 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
 }
 
 // soft/hard bounds for time management
-std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, Depth maxDepth, long soft, long hard) {
-
-  Depth depth = 1;
-
-  // we will return this
-  Move BestMove = Move();
-
-  Eval eval = -INF;
+Move iterative_depening(Position pos, tt* TT, Depth maxDepth, long soft, long hard) {
 
   // start time
   long start = std::chrono::high_resolution_clock::now().time_since_epoch().count();
   long end = start;
 
-  // previous time
-  long prevTime = 0;
+  Depth depth = 1;
+
+  // we will return this
+  std::vector<Move> temp;
+  generateMoves<false, true>(pos, temp);
+
+  if (temp.empty()) {
+    return {Move(), };
+  }
+
+  Move BestMove = temp[0];
+
+  Eval eval = -INF;
 
   int64_t nodes = 0;
 
@@ -406,21 +410,19 @@ std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, Depth maxDepth
       is_running = false;
       break;
     }
-    
+
     auto [bm, neval] = result.get();
     BestMove = bm; eval = neval;
-    
+
     nodes = nnodes;
-    
+
     end = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-    
+
     int Time = (end - start) / 1'000'000;
-    
-    int64_t elapsed = Time - prevTime;
-    int64_t nps = (elapsed > 0) ? (nodes * 1000 / elapsed) : 0;
+    int64_t nps = (Time > 0) ? (nodes * 1000 / Time) : 0;
 
     // UCI
-    
+
     std::cout << "info  depth " << toLen(depth, 4)
               << " nodes " << toLen(nodes, 11)
               << " nps " << toLen(nps, 9)
@@ -441,18 +443,17 @@ std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, Depth maxDepth
     //           << std::endl;
 
     depth++;
-    
-    prevTime = Time;
 
     // if we potentially will time out
     if (Time > soft) break;
 
   } while (depth <= maxDepth);
 
-  return {BestMove, nodes};
+  return BestMove;
 
 }
 
 void stopCommand() {
   stop = true;
+  is_running = false;
 }
