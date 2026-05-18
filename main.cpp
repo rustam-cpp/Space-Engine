@@ -1,4 +1,5 @@
 #include "board.h"
+#include "constants.h"
 #include "tt.h"
 #include "uci.h"
 #include "evaluation.h"
@@ -60,10 +61,13 @@ int main() {
     } else if (command == "stop") {
       stopCommand();
     } else if (command == "bench") {
-      Position startpos;
-      startpos.convertFromFen(StartFen);
+      Position Pos;
       tt* temp = new tt(8);
-      int64_t nodes = iterative_depening(startpos, temp, 5, BIG_INF, BIG_INF).second;
+      int64_t nodes = 0;
+      for (const auto& [fen, depth] : benchPositions) {
+        Pos.convertFromFen(fen);
+        nodes += iterative_depening(Pos, temp, depth, BIG_INF, BIG_INF).second;
+      }
       std::cout << nodes << std::endl;
       delete temp;
     } else if (command.substr(0, 25) == "setoption name Hash value") {
