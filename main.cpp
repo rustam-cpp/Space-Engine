@@ -59,6 +59,11 @@ int main() {
       go.detach();
     } else if (command == "stop") {
       stopCommand();
+    } else if (command == "bench") {
+      Position startpos;
+      startpos.convertFromFen("r1bqk2r/ppp2ppp/2np1n2/2b1p3/2B1P3/3P1N2/PPP2PPP/RNBQ1RK1 w kq - 0 6");
+      tt* temp = new tt(8);
+      std::cout << iterative_depening(startpos, temp, 5, BIG_INF, BIG_INF).second << std::endl;
     } else if (command.substr(0, 25) == "setoption name Hash value") {
       std::vector<std::string> cmd = split(command);
       // don't forget to free the allocated memory

@@ -91,12 +91,12 @@ void processGoCommand(Position& pos, tt* TT, std::string command) {
   Move bestmove;
   if (moveTime == BIG_INF) {
     // BestMove, Nodes
-    Move bm = iterative_depening(pos, TT, maxDepth,
+    auto [bm, n] = iterative_depening(pos, TT, maxDepth,
                    soft_bound(myTime, myInc) - 5,
                    hard_bound(myTime, myInc) - 5);
     bestmove = bm;
   } else {
-    Move bm = iterative_depening(pos, TT, maxDepth,
+    auto [bm, n] = iterative_depening(pos, TT, maxDepth,
                    soft_bound_fixed_movetime(moveTime) - 5,
                    moveTime - 5);
     bestmove = bm;

@@ -355,7 +355,7 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
 }
 
 // soft/hard bounds for time management
-Move iterative_depening(Position pos, tt* TT, Depth maxDepth, long soft, long hard) {
+std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, Depth maxDepth, long soft, long hard) {
 
   // start time
   long start = std::chrono::high_resolution_clock::now().time_since_epoch().count();
@@ -368,7 +368,7 @@ Move iterative_depening(Position pos, tt* TT, Depth maxDepth, long soft, long ha
   generateMoves<false, true>(pos, temp);
 
   if (temp.empty()) {
-    return Move();
+    return {Move(), 0};
   }
 
   Move BestMove = temp[0];
@@ -449,7 +449,7 @@ Move iterative_depening(Position pos, tt* TT, Depth maxDepth, long soft, long ha
 
   } while (depth <= maxDepth);
 
-  return BestMove;
+  return {BestMove, nodes};
 
 }
 

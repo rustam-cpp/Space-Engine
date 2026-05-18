@@ -35,7 +35,7 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, D
 std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval beta, int64_t& nodes, tt* TT);
 
 // we will use iterative deepening
-Move iterative_depening(Position pos, tt* TT, Depth maxDepth, long soft, long hard);
+std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, Depth maxDepth, long soft, long hard);
 
 // stops search when "stop" command received
 void stopCommand();
