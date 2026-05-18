@@ -368,7 +368,7 @@ Move iterative_depening(Position pos, tt* TT, Depth maxDepth, long soft, long ha
   generateMoves<false, true>(pos, temp);
 
   if (temp.empty()) {
-    return {Move(), };
+    return Move();
   }
 
   Move BestMove = temp[0];
@@ -418,7 +418,7 @@ Move iterative_depening(Position pos, tt* TT, Depth maxDepth, long soft, long ha
 
     end = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 
-    int Time = (end - start) / 1'000'000;
+    long Time = (end - start) / 1'000'000;
     int64_t nps = (Time > 0) ? (nodes * 1000 / Time) : 0;
 
     // UCI
