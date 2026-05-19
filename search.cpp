@@ -294,9 +294,6 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, D
 
 }
 
-// a good random
-std::mt19937 rng(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-
 std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval beta, int64_t& nodes, tt* TT) {
 
   // the search is running now
@@ -306,12 +303,15 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
   std::vector<Move> moves;
   generateMoves<false, false>(pos, moves);
 
-  // this array will contain all moves, that have the
-  // same evaluation as the best (they are all the best)
-  std::vector<Move> Bests;
+  // if it is already mate or stalemate
+  if (moves.empty()) {
+    return {Move(), (inCheck(pos) ? -Mate : 0)};
+  }
   
   // and this is the best move evaluation
   Eval BestEval = -INF;
+  // best move
+  Move BestMove;
 
   for (const Move& move : moves) {
 
@@ -325,13 +325,15 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
 
     // if we better than all previous moves
     if (eval > BestEval) {
-      Bests.clear();
+      BestMove = move;
       BestEval = eval;
     // or it's another option, that not worse, than previous
     }
-    if (eval == BestEval) {
-      Bests.push_back(move);
-    }
+
+    alpha = std::max(alpha, eval);
+
+    if (alpha >= beta)
+      break;
 
     // std::cerr << convertMoveToString(move) << ": " << eval << std::endl;
 
@@ -342,16 +344,8 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
   // now we are not running
   is_running = false;
 
-  // if it is already mate or stalemate
-  if (Bests.empty()) {
-    return {Move(), (inCheck(pos) ? -Mate : 0)};
-  }
-
-  // we peak a random move from all the best
-  int i = std::uniform_int_distribution<int>(0, (int)Bests.size() - 1)(rng);
-
   // and return values
-  return {Bests[i], BestEval};
+  return {BestMove, BestEval};
 }
 
 // soft/hard bounds for time management
