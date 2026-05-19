@@ -4,7 +4,6 @@
 #include "uci.h"
 #include "evaluation.h"
 #include "search.h"
-#include <chrono>
 #include <iostream>
 #include <thread>
 
@@ -23,7 +22,14 @@ void info() {
   std::cout << std::endl;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+
+  // ./space bench
+  if (argc == 2) {
+    std::string cmd = argv[1];
+    processBenchCommand();
+    return 0;
+  }
 
   info();
 
@@ -62,18 +68,7 @@ int main() {
     } else if (command == "stop") {
       stopCommand();
     } else if (command == "bench") {
-      Position Pos;
-      tt* temp = new tt(8);
-      int64_t nodes = 0;
-      long start = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-      for (const auto& [fen, depth] : benchPositions) {
-        Pos.convertFromFen(fen);
-        nodes += iterative_depening(Pos, temp, depth, BIG_INF, BIG_INF).second;
-      }
-      long end = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-      long Time = (end - start) / 1'000'000;
-      std::cout << nodes << " nodes " << (Time > 0 ? nodes * 1000 / Time : 0) << " nps" << std::endl;
-      delete temp;
+      processBenchCommand();
     } else if (command.substr(0, 25) == "setoption name Hash value") {
       std::vector<std::string> cmd = split(command);
       // don't forget to free the allocated memory
