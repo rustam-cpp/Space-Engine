@@ -1,12 +1,5 @@
 #pragma once
 
-// tricks used in search:
-//  * alpha-beta pruning
-//  * move ordering
-//  * iterative deepening
-//  * aspiration window
-//  * transposition table
-
 #include "movegen.h"
 #include "tt.h"
 #include <random>
