@@ -4,6 +4,7 @@
 #include "uci.h"
 #include "evaluation.h"
 #include "search.h"
+#include <chrono>
 #include <iostream>
 #include <thread>
 
@@ -64,11 +65,14 @@ int main() {
       Position Pos;
       tt* temp = new tt(8);
       int64_t nodes = 0;
+      long start = std::chrono::high_resolution_clock::now().time_since_epoch().count();
       for (const auto& [fen, depth] : benchPositions) {
         Pos.convertFromFen(fen);
         nodes += iterative_depening(Pos, temp, depth, BIG_INF, BIG_INF).second;
       }
-      std::cout << nodes << std::endl;
+      long end = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+      long Time = (end - start) / 1'000'000;
+      std::cout << nodes << " nodes " << (Time > 0 ? nodes * 1000 / Time : 0) << " nps" << std::endl;
       delete temp;
     } else if (command.substr(0, 25) == "setoption name Hash value") {
       std::vector<std::string> cmd = split(command);
