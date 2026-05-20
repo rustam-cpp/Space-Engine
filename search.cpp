@@ -314,7 +314,7 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
   // if we can use TT
   Entry* entry = TT->probe(pos.ZobristHash);
 
-  Move ttMove;
+  Move ttMove = Move();
   if (entry != nullptr) {
     ttMove = entry->bestMove;
   }
@@ -324,27 +324,24 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
   // best move
   Move BestMove;
 
-  auto it = std::find(moves.begin(), moves.end(), ttMove);
-  if (it != moves.end()) {
-    std::swap(moves[0], moves[it - moves.begin()]);
-  }
-
-  for (const Move& move : moves) {
+  for (int i = 0; i < (int)moves.size(); i++) {
 
     if (!is_running) return {BestMove, BestEval};
 
+    pickMove(moves, i, ttMove);
+
     // don't forget to move
-    doMove(pos, move);
+    doMove(pos, moves[i]);
 
     // we evaluate current position
     Eval eval = -search(depth - 1, pos, -beta, -alpha, nodes, TT, 0);
 
     // don't forget to undo this move
-    undoMove(pos, move);
+    undoMove(pos, moves[i]);
 
     // if we better than all previous moves
     if (eval > BestEval) {
-      BestMove = move;
+      BestMove = moves[i];
       BestEval = eval;
     }
 
