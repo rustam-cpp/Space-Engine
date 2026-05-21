@@ -299,6 +299,9 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
   // the search is running now
   is_running = true;
 
+  // original alpha
+  Eval oA = alpha;
+
   // we will look at every legal move in the position
   std::vector<Move> moves;
   generateMoves<false, false>(pos, moves);
@@ -307,27 +310,39 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
   if (moves.empty()) {
     return {Move(), (inCheck(pos) ? -Mate : 0)};
   }
+
+  // if we can use TT
+  Entry* entry = TT->probe(pos.ZobristHash);
+
+  Move ttMove = Move();
+  if (entry != nullptr) {
+    ttMove = entry->bestMove;
+  }
   
   // and this is the best move evaluation
   Eval BestEval = -INF;
   // best move
   Move BestMove;
 
-  for (const Move& move : moves) {
+  for (int i = 0; i < (int)moves.size(); i++) {
 
-    if (!is_running) break;
+    if (!is_running) return {BestMove, BestEval};
+
+    pickMove(moves, i, ttMove);
 
     // don't forget to move
-    doMove(pos, move);
+    doMove(pos, moves[i]);
 
     // we evaluate current position
     Eval eval = -search(depth - 1, pos, -beta, -alpha, nodes, TT, 0);
 
+    // don't forget to undo this move
+    undoMove(pos, moves[i]);
+
     // if we better than all previous moves
     if (eval > BestEval) {
-      BestMove = move;
+      BestMove = moves[i];
       BestEval = eval;
-    // or it's another option, that not worse, than previous
     }
 
     alpha = std::max(alpha, eval);
@@ -337,15 +352,25 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
 
     // std::cerr << convertMoveToString(move) << ": " << eval << std::endl;
 
-    // don't forget to undo this move
-    undoMove(pos, move);
   }
+
+  Bound flag;
+
+  if (BestEval <= oA)
+    flag = UPPER;
+  else if (BestEval >= beta)
+    flag = LOWER;
+  else
+    flag = EXACT;
+
+  TT->store(pos.ZobristHash, depth, BestEval, flag, BestMove);
 
   // now we are not running
   is_running = false;
 
   // and return values
   return {BestMove, BestEval};
+
 }
 
 // soft/hard bounds for time management
