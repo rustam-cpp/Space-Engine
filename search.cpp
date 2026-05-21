@@ -241,6 +241,7 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, D
   for (int i = 0; i < (int)moves.size(); i++) {
 
     if (!is_running) break;
+
     pickMove(moves, i, ttMove);
 
     const Move move = moves[i];
@@ -249,9 +250,37 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, D
     doMove(pos, move);
 
     // we run the recursively search
-    
-    Eval eval = -search(depth - 1, pos, -b, -a, nodes, TT, ply + 1);
-    
+
+    Eval eval;
+
+    if (depth >= 3 && i >= 4 && getType(move.Captured) == NONE && !inCheck(pos)) {
+
+      // LMR (Late Move Reductions)
+      Depth r = (_log2(depth) * _log2(i + 1)) / 2;
+      r = std::min((int)r, 2);
+
+      eval = -search(depth - 1 - r, pos, -a - 1, -a, nodes, TT, ply + 1);
+
+      if (eval > a) {
+        eval = -search(depth - 1, pos, -b, -a, nodes, TT, ply + 1);
+      }
+
+    } else {
+
+      // PVS (Principal Variation Search)
+      if (i == 0) {
+        eval = -search(depth - 1, pos, -b, -a, nodes, TT, ply + 1);
+      } else {
+
+        eval = -search(depth - 1, pos, -a - 1, -a, nodes, TT, ply + 1);
+        if (eval > a) {
+          eval = -search(depth - 1, pos, -b, -a, nodes, TT, ply + 1);
+        }
+
+      }
+
+    }
+
     // undo move
     undoMove(pos, move);
 

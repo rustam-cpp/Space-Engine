@@ -19,3 +19,7 @@ inline Square NextBit(Bitboard B, Square i) {
 inline uint8_t Count(Bitboard B) {
   return __builtin_popcountll(B);
 }
+
+inline uint8_t _log2(int x) {
+  return 31 - __builtin_clz(x);
+}
