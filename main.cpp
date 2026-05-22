@@ -15,7 +15,7 @@ void info() {
   std::cout << "        ) |   | |  |  |    |--' " << std::endl;
   std::cout << "  `.___.` |__.` '__|_ '__' '__' " << std::endl;
   std::cout << "          | " << std::endl;
-  std::cout << "          |                v1.0 " << std::endl;
+  std::cout << "          | " << std::endl;
   std::cout << std::endl;
   std::cout << "AUTHOR: rustam-cpp" << std::endl;
   std::cout << "SOURCE CODE: https://github.com/rustam-cpp/Space-Engine" << std::endl;
@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
     // std::cerr << command << '\n';
 
     if (command == "uci") {
-      std::cout << "id name Space 1.0\n";
+      std::cout << "id name Space\n";
       std::cout << "id author rustam-cpp\n";
       std::cout << "option name Hash type spin default 256 min 1 max 1024\n";
       std::cout << "option name Threads type spin default 1 min 1 max 1\n";
