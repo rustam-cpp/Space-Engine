@@ -429,12 +429,9 @@ std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, Depth maxDepth
 
   do {
 
-    // new nodes counter
-    int64_t nnodes = 0;
-
     is_running = true;
 
-    std::future<std::pair<Move, Eval>> result = std::async(search_root, pos, depth, -INF, INF, std::ref(nnodes), TT);
+    std::future<std::pair<Move, Eval>> result = std::async(search_root, pos, depth, -INF, INF, std::ref(nodes), TT);
 
     while (true) {
 
@@ -461,8 +458,6 @@ std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, Depth maxDepth
 
     auto [bm, neval] = result.get();
     BestMove = bm; eval = neval;
-
-    nodes = nnodes;
 
     end = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 

@@ -2,19 +2,6 @@
 #include "converts.h"
 #include <iostream>
 
-void Position::setPiece(Square S, Piece P) {
-  Piece p = getPiece(S);
-  if (p != NONE) ZobristHash ^= Zobrist[p][S];
-  board[S] = P;
-  if (P == NONE) return;
-  ZobristHash ^= Zobrist[P][S];
-  if (getColor(P) == WHITE)
-    WhitePieces |= (1ULL << S);
-  else
-    BlackPieces |= (1ULL << S);
-  pieces[P] |= (1ULL << S);
-}
-
 void Position::resetPiece(Square S, Piece P) {
   if (P == NONE) return;
   ZobristHash ^= Zobrist[P][S];
@@ -24,6 +11,22 @@ void Position::resetPiece(Square S, Piece P) {
   else
     BlackPieces &= ~(1ULL << S);
   pieces[P] &= ~(1ULL << S);
+}
+
+void Position::setPiece(Square S, Piece P) {
+  Piece p = getPiece(S);
+  if (p != NONE) {
+    ZobristHash ^= Zobrist[p][S];
+    resetPiece(S, p);
+  }
+  board[S] = P;
+  if (P == NONE) return;
+  ZobristHash ^= Zobrist[P][S];
+  if (getColor(P) == WHITE)
+    WhitePieces |= (1ULL << S);
+  else
+    BlackPieces |= (1ULL << S);
+  pieces[P] |= (1ULL << S);
 }
 
 Piece Position::getPiece(Square S) const {
