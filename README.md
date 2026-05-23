@@ -32,8 +32,11 @@ So, it's a pretty fast move generation function, because I use many bit manipula
 - Quiescence search
 - Alpha-beta pruning
 - Iterative deepening
-- Move ordering
 - Transposition table
+
+### Move ordering
+- TT best move is always first
+- captures/promotions ordering
 
 ### Time management
 - Soft and hard bounds
