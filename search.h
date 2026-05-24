@@ -22,7 +22,7 @@ Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, Depth ply);
 
 // a search function created for calculating over
 // ~all moves, positions to calcualte the best move
-Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, Depth ply);
+Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, Depth ply, Depth ext);
 
 // finds the best move in the position
 std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval beta, int64_t& nodes, tt* TT);
