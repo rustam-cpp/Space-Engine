@@ -178,7 +178,7 @@ Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, Depth ply) {
 
 }
 
-Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, Depth ply) {
+Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, Depth ply, Depth ext) {
 
   if (!is_running) return 0;
 
@@ -253,28 +253,33 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, D
 
     Eval eval;
 
-    if (depth >= 3 && i >= 4 && getType(move.Captured) == NONE && !inCheck(pos)) {
+    bool isCheck = inCheck(pos);
+
+    Depth e = 0;
+    e += (isCheck && ext < 16 ? 1 : 0);
+
+    if (depth >= 3 && i >= 4 && getType(move.Captured) == NONE && !isCheck) {
 
       // LMR (Late Move Reductions)
       Depth r = (_log2(depth) * _log2(i + 1)) / 2;
       r = std::min((int)r, 2);
 
-      eval = -search(depth - 1 - r, pos, -a - 1, -a, nodes, TT, ply + 1);
+      eval = -search(depth - 1 - r + e, pos, -a - 1, -a, nodes, TT, ply + 1, ext + e);
 
       if (eval > a) {
-        eval = -search(depth - 1, pos, -b, -a, nodes, TT, ply + 1);
+        eval = -search(depth - 1 + e, pos, -b, -a, nodes, TT, ply + 1, ext + e);
       }
 
     } else {
 
       // PVS (Principal Variation Search)
       if (i == 0) {
-        eval = -search(depth - 1, pos, -b, -a, nodes, TT, ply + 1);
+        eval = -search(depth - 1 + e, pos, -b, -a, nodes, TT, ply + 1, ext + e);
       } else {
 
-        eval = -search(depth - 1, pos, -a - 1, -a, nodes, TT, ply + 1);
+        eval = -search(depth - 1 + e, pos, -a - 1, -a, nodes, TT, ply + 1, ext + e);
         if (eval > a) {
-          eval = -search(depth - 1, pos, -b, -a, nodes, TT, ply + 1);
+          eval = -search(depth - 1 + e, pos, -b, -a, nodes, TT, ply + 1, ext + e);
         }
 
       }
@@ -363,7 +368,7 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
     doMove(pos, moves[i]);
 
     // we evaluate current position
-    Eval eval = -search(depth - 1, pos, -beta, -alpha, nodes, TT, 0);
+    Eval eval = -search(depth - 1, pos, -beta, -alpha, nodes, TT, 0, 0);
 
     // don't forget to undo this move
     undoMove(pos, moves[i]);
