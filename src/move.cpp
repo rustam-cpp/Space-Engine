@@ -166,21 +166,17 @@ void undoMove(Position& pos, const Move& move, rt* RT) {
     pos.setPiece(move.From, move.Moved);
   }
   // reset other values
-  pos.ZobristHash ^= pos.EnPassantSquare << 12;
   pos.EnPassantSquare = move.EnPassantSquare;
-  pos.ZobristHash ^= pos.EnPassantSquare << 12;
 
-  pos.ZobristHash ^= pos.Castlings;
   pos.Castlings = move.Mask;
-  pos.ZobristHash ^= pos.Castlings;
 
   pos.HalfmoveClock = move.HalfmoveClock;
 
   if (pos.WhiteToMove) pos.FullmoveClock--;
 
-  pos.ZobristHash ^= pos.WhiteToMove << 4;
   pos.WhiteToMove = !pos.WhiteToMove;
-  pos.ZobristHash ^= pos.WhiteToMove << 4;
+
+  pos.ZobristHash = RT->stack.back();
 
 }
 
