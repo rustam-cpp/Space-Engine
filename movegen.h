@@ -358,7 +358,7 @@ inline bool inCheck(const Position& pos) {
 
 // generates all legal moves
 template <bool Q, bool OOM>
-void generateMoves(Position pos, std::vector<Move>& moves) {
+void generateMoves(Position& pos, std::vector<Move>& moves, rt* RT) {
 
   moves.reserve((OOM ? 1 : 40));
   std::vector<std::pair<Bitboard, Square>> myMoves, opMoves;
@@ -374,7 +374,7 @@ void generateMoves(Position pos, std::vector<Move>& moves) {
     // we iterate over all bits in M
     for (Square T = FirstBit(M); T < 64; T = NextBit(M, T)) {
       Move move = makeMove(pos, S, T, NONE);
-      doMove(pos, move);
+      doMove(pos, move, RT);
       // 1.1 check the legality of the move
       if (!inCheckOp(pos)) {
         // 1.2. but it can be a promotion
@@ -383,7 +383,10 @@ void generateMoves(Position pos, std::vector<Move>& moves) {
           move.PromotedTo = makePiece((pos.WhiteToMove ? BLACK : WHITE), KNIGHT);
           moves.push_back(move);
           // if we need to generate only 1 move
-          if (OOM) return;
+          if (OOM) {
+            undoMove(pos, move, RT);
+            return;
+          }
           move.PromotedTo = makePiece((pos.WhiteToMove ? BLACK : WHITE), BISHOP);
           moves.push_back(move);
           move.PromotedTo = makePiece((pos.WhiteToMove ? BLACK : WHITE), ROOK);
@@ -395,10 +398,13 @@ void generateMoves(Position pos, std::vector<Move>& moves) {
         } else {
           moves.push_back(move);
           // if we need to generate only 1 move
-          if (OOM) return;
+          if (OOM) {
+            undoMove(pos, move, RT);
+            return;
+          }
         }
       }
-      undoMove(pos, move);
+      undoMove(pos, move, RT);
     }
   }
 

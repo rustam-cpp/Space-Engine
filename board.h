@@ -2,6 +2,7 @@
 
 #include "types.h"
 #include "constants.h"
+#include "rt.h"
 #include <vector>
 #include <ostream>
 #include <ext/pb_ds/assoc_container.hpp>
@@ -50,12 +51,6 @@ struct Position {
     BlackPieces = 0;
     Castlings = 0;
   }
-  // for repetition draws
-  std::vector<uint64_t> Positions;
-  // for fifty-move rule we will count positions by them Zobrist hash.
-  // __gnu_pbds::gp_hash_table is a very fast
-  // (faster than std::unordered_map) hash table.
-  __gnu_pbds::gp_hash_table<uint64_t, int> PositionsCounter;
   // for fast getPiece function
   Piece board[64];
   // for fast operations, which can be implemented with bits operations
@@ -72,13 +67,13 @@ struct Position {
   void resetPiece(Square S, Piece P);
   Piece getPiece(Square S) const;
   // function for tests and uci
-  void convertFromFen(std::string FEN);
+  void convertFromFen(std::string FEN, rt* RT);
   // with Zobrist hash we can convert position on the board to a single 
   // 64-bit number. with them we can work faster with transposition table
   uint64_t ZobristHash;
   uint64_t getZobristHash() const;
   bool isFiftyMoveDraw() const;
-  bool isRepetitionDraw();
+  bool isRepetitionDraw(rt* RT);
 };
 
 std::ostream& operator<<(std::ostream& out, Position& P);

@@ -3,7 +3,7 @@ EXE=space
 COMPILER=g++
 VERSION=-std=c++23
 CFLAGS=-m64 -O3 -mavx2 -mpopcnt -mlzcnt -mbmi2 -Wall -Wextra -Wshadow
-CPPFILES=board.cpp converts.cpp evaluation.cpp main.cpp move.cpp search.cpp tt.cpp uci.cpp
+CPPFILES=board.cpp converts.cpp evaluation.cpp main.cpp move.cpp rt.cpp search.cpp tt.cpp uci.cpp
 
 OFILES=$(CPPFILES:.cpp=.o)
 
