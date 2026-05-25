@@ -25,7 +25,7 @@ Move makeMove(const Position& pos, Square From, Square To, Piece PromotedTo) {
 }
 
 // plays move in givven position
-void doMove(Position& pos, const Move& move) {
+void doMove(Position& pos, const Move& move, rt* RT) {
 
   // 1. move Pieces
   if (move.EnPassant) {
@@ -133,16 +133,14 @@ void doMove(Position& pos, const Move& move) {
   else
     pos.HalfmoveClock++;
 
-  pos.Positions.push_back(pos.ZobristHash);
-  pos.PositionsCounter[pos.ZobristHash]++;
+  RT->add(pos.ZobristHash);
 
 }
 
 // undoes move in givven position
-void undoMove(Position& pos, const Move& move) {
+void undoMove(Position& pos, const Move& move, rt* RT) {
 
-  pos.PositionsCounter[pos.ZobristHash]--;
-  pos.Positions.pop_back();
+  RT->del();
 
   // it's copy + paste doMove, but all is opposite
   if (move.EnPassant) {

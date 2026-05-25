@@ -33,7 +33,7 @@ Piece Position::getPiece(Square S) const {
   return board[S];
 }
 
-void Position::convertFromFen(std::string FEN) {
+void Position::convertFromFen(std::string FEN, rt* RT) {
 
   // reseting all values
   std::fill(pieces, pieces + 32, 0);
@@ -125,9 +125,9 @@ void Position::convertFromFen(std::string FEN) {
   // generate zobrist hash for a new position
   ZobristHash = getZobristHash();
 
-  // and writing it into the array
-  Positions.push_back(ZobristHash);
-  PositionsCounter[ZobristHash]++;
+  RT->clear();
+  RT->add(ZobristHash);
+
 }
 
 // just a beautiful position output fuction for debug
@@ -167,6 +167,6 @@ bool Position::isFiftyMoveDraw() const {
   return HalfmoveClock >= 100;
 }
 
-bool Position::isRepetitionDraw() {
-  return PositionsCounter[Positions.back()] >= 3;
+bool Position::isRepetitionDraw(rt* RT) {
+  return RT->isDraw(ZobristHash, HalfmoveClock);
 }

@@ -20,11 +20,11 @@ std::vector<std::string> split(std::string command) {
   return result;
 }
 
-void processPositionCommand(Position& pos, std::string command) {
+void processPositionCommand(Position& pos, rt* RT, std::string command) {
   std::vector<std::string> cmd = split(command);
   int i;
   if (cmd[1] == "startpos") {
-    pos.convertFromFen(StartFen);
+    pos.convertFromFen(StartFen, RT);
     i = 2;
   } else {
     std::string fen = cmd[2] + " "
@@ -33,7 +33,7 @@ void processPositionCommand(Position& pos, std::string command) {
                     + cmd[5] + " "
                     + cmd[6] + " "
                     + cmd[7];
-    pos.convertFromFen(fen);
+    pos.convertFromFen(fen, RT);
     i = 8;
   }
   if (i < (int)cmd.size() && cmd[i] == "moves") {
@@ -49,12 +49,12 @@ void processPositionCommand(Position& pos, std::string command) {
         // for example e7e8q, but e7 is a white pawn
         if (pos.WhiteToMove) PromotedTo = swapColor(PromotedTo);
       }
-      doMove(pos, makeMove(pos, From, To, PromotedTo));
+      doMove(pos, makeMove(pos, From, To, PromotedTo), RT);
     }
   }
 }
 
-void processGoCommand(Position& pos, tt* TT, std::string command) {
+void processGoCommand(Position& pos, tt* TT, rt* RT, std::string command) {
   Depth maxDepth = 64;
   // base time, increment
   long myTime = BIG_INF, myInc = 0;
@@ -91,12 +91,12 @@ void processGoCommand(Position& pos, tt* TT, std::string command) {
   Move bestmove;
   if (moveTime == BIG_INF) {
     // BestMove, Nodes
-    auto [bm, n] = iterative_depening(pos, TT, maxDepth,
+    auto [bm, n] = iterative_depening(pos, TT, RT, maxDepth,
                    soft_bound(myTime, myInc) - 5,
                    hard_bound(myTime, myInc) - 5);
     bestmove = bm;
   } else {
-    auto [bm, n] = iterative_depening(pos, TT, maxDepth,
+    auto [bm, n] = iterative_depening(pos, TT, RT, maxDepth,
                    soft_bound_fixed_movetime(moveTime) - 5,
                    moveTime - 5);
     bestmove = bm;
@@ -106,15 +106,17 @@ void processGoCommand(Position& pos, tt* TT, std::string command) {
 
 void processBenchCommand() {
   Position Pos;
-  tt* temp = new tt(8);
+  tt* tempTT = new tt(8);
+  rt* tempRT = new rt;
   int64_t nodes = 0;
   long start = std::chrono::high_resolution_clock::now().time_since_epoch().count();
   for (const auto& [fen, depth] : benchPositions) {
-    Pos.convertFromFen(fen);
-    nodes += iterative_depening(Pos, temp, depth, BIG_INF, BIG_INF).second;
+    Pos.convertFromFen(fen, tempRT);
+    nodes += iterative_depening(Pos, tempTT, tempRT, depth, BIG_INF, BIG_INF).second;
   }
   long end = std::chrono::high_resolution_clock::now().time_since_epoch().count();
   long Time = (end - start) / 1'000'000;
   std::cout << nodes << " nodes " << (Time > 0 ? nodes * 1000 / Time : 0) << " nps" << std::endl;
-  delete temp;
+  delete tempTT;
+  delete tempRT;
 }

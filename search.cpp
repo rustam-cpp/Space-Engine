@@ -13,12 +13,12 @@
 std::atomic<bool> is_running = false;
 std::atomic<bool> stop = false;
 
-int64_t perft(Depth depth, Position pos) {
+int64_t perft(Depth depth, Position pos, rt* RT) {
   // leaf
   if (depth == 0) return 1;
   // all legal moves
   std::vector<Move> moves;
-  generateMoves<false, false>(pos, moves);
+  generateMoves<false, false>(pos, moves, RT);
   // if depth = 1 than the answer
   // is count of all legal moves
   if (depth == 1) return moves.size();
@@ -27,11 +27,11 @@ int64_t perft(Depth depth, Position pos) {
   // we iterate over all moves
   for (const Move& move : moves) {
     // play move
-    doMove(pos, move);
+    doMove(pos, move, RT);
     // do it recursively
-    ans += perft(depth - 1, pos);
+    ans += perft(depth - 1, pos, RT);
     // undo move
-    undoMove(pos, move);
+    undoMove(pos, move, RT);
   }
   return ans;
 }
@@ -70,14 +70,14 @@ void pickMove(std::vector<Move>& moves, int start, const Move& ttMove) {
 
 }
 
-Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, Depth ply) {
+Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, rt* RT, Depth ply) {
 
   if (!is_running) return 0;
 
   nodes++;
 
   // if there is a draw on the board, then you need to return 0
-  if (pos.isRepetitionDraw() || pos.isFiftyMoveDraw())
+  if (pos.isRepetitionDraw(RT) || pos.isFiftyMoveDraw())
     return 0;
 
   // static evaluation of position
@@ -110,10 +110,10 @@ Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, Depth ply) {
   }
 
   std::vector<Move> moves;
-  generateMoves<true, false>(pos, moves);
+  generateMoves<true, false>(pos, moves, RT);
 
   if (moves.empty()) {
-    generateMoves<false, true>(pos, moves);
+    generateMoves<false, true>(pos, moves, RT);
     // the end
     if (moves.empty()) {
       if (inCheck(pos))
@@ -137,11 +137,11 @@ Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, Depth ply) {
 
     pickMove(moves, i, Move());
 
-    doMove(pos, moves[i]);
+    doMove(pos, moves[i], RT);
 
-    eval = -qsearch(pos, -b, -a, nodes, TT, ply + 1);
+    eval = -qsearch(pos, -b, -a, nodes, TT, RT, ply + 1);
 
-    undoMove(pos, moves[i]);
+    undoMove(pos, moves[i], RT);
     
     if (eval > a) {
       bestMove = moves[i];
@@ -151,6 +151,7 @@ Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, Depth ply) {
     if (eval >= b) {
       break;
     }
+
   }
 
   Bound flag;
@@ -178,14 +179,14 @@ Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, Depth ply) {
 
 }
 
-Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, Depth ply, Depth ext) {
+Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, rt* RT, Depth ply, Depth ext) {
 
   if (!is_running) return 0;
 
   nodes++;
 
   // if there is a draw on the board, then you need to return 0
-  if (pos.isRepetitionDraw() || pos.isFiftyMoveDraw())
+  if (pos.isRepetitionDraw(RT) || pos.isFiftyMoveDraw())
     return 0;
 
   // if we can use TT
@@ -209,12 +210,12 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, D
   
   // qsearch
   if (depth <= 0) {
-    return qsearch(pos, a, b, nodes, TT, ply);
+    return qsearch(pos, a, b, nodes, TT, RT, ply);
   }
 
   // all legal moves
   std::vector<Move> moves;
-  generateMoves<false, false>(pos, moves);
+  generateMoves<false, false>(pos, moves, RT);
 
   if (moves.empty()) {
     if (inCheck(pos))
@@ -247,7 +248,7 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, D
     const Move move = moves[i];
 
     // play move
-    doMove(pos, move);
+    doMove(pos, move, RT);
 
     // we run the recursively search
 
@@ -264,22 +265,22 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, D
       Depth r = (_log2(depth) * _log2(i + 1)) / 2;
       r = std::min((int)r, 2);
 
-      eval = -search(depth - 1 - r + e, pos, -a - 1, -a, nodes, TT, ply + 1, ext + e);
+      eval = -search(depth - 1 - r + e, pos, -a - 1, -a, nodes, TT, RT, ply + 1, ext + e);
 
       if (eval > a) {
-        eval = -search(depth - 1 + e, pos, -b, -a, nodes, TT, ply + 1, ext + e);
+        eval = -search(depth - 1 + e, pos, -b, -a, nodes, TT, RT, ply + 1, ext + e);
       }
 
     } else {
 
       // PVS (Principal Variation Search)
       if (i == 0) {
-        eval = -search(depth - 1 + e, pos, -b, -a, nodes, TT, ply + 1, ext + e);
+        eval = -search(depth - 1 + e, pos, -b, -a, nodes, TT, RT, ply + 1, ext + e);
       } else {
 
-        eval = -search(depth - 1 + e, pos, -a - 1, -a, nodes, TT, ply + 1, ext + e);
+        eval = -search(depth - 1 + e, pos, -a - 1, -a, nodes, TT, RT, ply + 1, ext + e);
         if (eval > a) {
-          eval = -search(depth - 1 + e, pos, -b, -a, nodes, TT, ply + 1, ext + e);
+          eval = -search(depth - 1 + e, pos, -b, -a, nodes, TT, RT, ply + 1, ext + e);
         }
 
       }
@@ -287,7 +288,7 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, D
     }
 
     // undo move
-    undoMove(pos, move);
+    undoMove(pos, move, RT);
 
     // okay, maybe we have a new best move
 
@@ -328,7 +329,7 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, D
 
 }
 
-std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval beta, int64_t& nodes, tt* TT) {
+std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval beta, int64_t& nodes, tt* TT, rt* RT) {
 
   // the search is running now
   is_running = true;
@@ -338,7 +339,7 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
 
   // we will look at every legal move in the position
   std::vector<Move> moves;
-  generateMoves<false, false>(pos, moves);
+  generateMoves<false, false>(pos, moves, RT);
 
   // if it is already mate or stalemate
   if (moves.empty()) {
@@ -365,13 +366,13 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
     pickMove(moves, i, ttMove);
 
     // don't forget to move
-    doMove(pos, moves[i]);
+    doMove(pos, moves[i], RT);
 
     // we evaluate current position
-    Eval eval = -search(depth - 1, pos, -beta, -alpha, nodes, TT, 0, 0);
+    Eval eval = -search(depth - 1, pos, -beta, -alpha, nodes, TT, RT, 0, 0);
 
     // don't forget to undo this move
-    undoMove(pos, moves[i]);
+    undoMove(pos, moves[i], RT);
 
     // if we better than all previous moves
     if (eval > BestEval) {
@@ -408,7 +409,7 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
 }
 
 // soft/hard bounds for time management
-std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, Depth maxDepth, long soft, long hard) {
+std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, rt* RT, Depth maxDepth, long soft, long hard) {
 
   // start time
   long start = std::chrono::high_resolution_clock::now().time_since_epoch().count();
@@ -418,7 +419,7 @@ std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, Depth maxDepth
 
   // we will return this
   std::vector<Move> temp;
-  generateMoves<false, true>(pos, temp);
+  generateMoves<false, true>(pos, temp, RT);
 
   if (temp.empty()) {
     return {Move(), 0};
@@ -436,7 +437,7 @@ std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, Depth maxDepth
 
     is_running = true;
 
-    std::future<std::pair<Move, Eval>> result = std::async(search_root, pos, depth, -INF, INF, std::ref(nodes), TT);
+    std::future<std::pair<Move, Eval>> result = std::async(search_root, pos, depth, -INF, INF, std::ref(nodes), TT, RT);
 
     while (true) {
 

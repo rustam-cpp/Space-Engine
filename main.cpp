@@ -24,6 +24,8 @@ void info() {
 
 int main(int argc, char* argv[]) {
 
+  rt* RT = new rt;
+
   // ./space bench
   if (argc == 2) {
     std::string cmd = argv[1];
@@ -35,7 +37,7 @@ int main(int argc, char* argv[]) {
 
   // board
   Position pos;
-  pos.convertFromFen(StartFen);
+  pos.convertFromFen(StartFen, RT);
 
   // transposition table
   tt* TT = new tt(256);
@@ -60,10 +62,11 @@ int main(int argc, char* argv[]) {
     } else if (command == "ucinewgame") {
       // after each ucinewgame we can clear our TT
       TT->clear();
+      RT->clear();
     } else if (command.substr(0, 8) == "position") {
-      processPositionCommand(pos, command);
+      processPositionCommand(pos, RT, command);
     } else if (command.substr(0, 2) == "go") {
-      std::thread go(processGoCommand, std::ref(pos), TT, command);
+      std::thread go(processGoCommand, std::ref(pos), TT, RT, command);
       go.detach();
     } else if (command == "stop") {
       stopCommand();
