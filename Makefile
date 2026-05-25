@@ -1,18 +1,27 @@
-EXE=space
+EXE = space
 
-COMPILER=g++
-VERSION=-std=c++23
-CFLAGS=-m64 -O3 -mavx2 -mpopcnt -mlzcnt -mbmi2 -Wall -Wextra -Wshadow
-CPPFILES=board.cpp converts.cpp evaluation.cpp main.cpp move.cpp rt.cpp search.cpp tt.cpp uci.cpp
+COMPILER = g++
+VERSION = -std=c++23
+CFLAGS = -m64 -O3 -mavx2 -mpopcnt -mlzcnt -mbmi2 -Wall -Wextra -Wshadow
 
-OFILES=$(CPPFILES:.cpp=.o)
+SRC = src
+BUILD = build
 
-all: $(OFILES)
-	$(COMPILER) $(VERSION) $(OFILES) -o $(EXE) $(CFLAGS)
-	rm -f $(OFILES)
+CPPFILES = board.cpp converts.cpp evaluation.cpp main.cpp move.cpp rt.cpp search.cpp tt.cpp uci.cpp
 
-%.o: %.cpp
-	$(COMPILER) $(VERSION) -c $< -o $@ $(CFLAGS)
+OBJECTS = $(CPPFILES:.cpp=.o)
+OBJECTS := $(addprefix $(BUILD)/,$(OBJECTS))
 
-$(OFILES): %.o: %.cpp
-	$(COMPILER) $(VERSION) -c $< -o $@ $(CFLAGS)
+all: builddir $(EXE)
+
+builddir:
+	mkdir -p $(BUILD)
+
+$(EXE): $(OBJECTS)
+	$(COMPILER) $(VERSION) $(CFLAGS) $^ -o $@
+
+$(BUILD)/%.o: $(SRC)/%.cpp
+	$(COMPILER) $(VERSION) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -rf $(BUILD) $(EXE)

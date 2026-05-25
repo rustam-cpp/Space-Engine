@@ -1,0 +1,9 @@
+# Archives
+*.zip
+*.7z
+
+# Build files
+build/
+
+# Built binary
+space
