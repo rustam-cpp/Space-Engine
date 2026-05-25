@@ -6,7 +6,7 @@
 #include "move.h"
 
 // a struct for an element of transposition table (TT)
-struct Entry {
+struct TTentry {
   // evaluation
   Eval eval;
   // zobrist hash
@@ -18,7 +18,7 @@ struct Entry {
   // tt best move
   Move bestMove;
   // constructor
-  Entry() {
+  TTentry() {
     zhash = 0;
     eval = -INF;
     depth = -1;
@@ -30,7 +30,7 @@ struct Entry {
 
 struct tt {
   // all the elements
-  Entry* table;
+  TTentry* table;
   // size of this array
   int size;
   // constructor
@@ -40,15 +40,15 @@ struct tt {
     sizeMB = std::max(sizeMB, 1);
     
     // calculating size of array
-    size = 1048576LL * sizeMB / sizeof(Entry);
+    size = 1048576LL * sizeMB / sizeof(TTentry);
     size = 1 << (31 - __builtin_clz(size));
 
     // creating table
-    table = new Entry[size];
-    std::fill(table, table + size, Entry());
+    table = new TTentry[size];
+    std::fill(table, table + size, TTentry());
   }
 
-  inline Entry* probe(uint64_t ZH);
+  inline TTentry* probe(uint64_t ZH);
   
   inline void store(uint64_t ZH, Depth d, Eval e, Bound f, const Move& m);
   
@@ -59,8 +59,8 @@ struct tt {
   }
 };
 
-inline Entry* tt::probe(uint64_t ZH) {
-  Entry& entry = table[ZH & (size - 1)];
+inline TTentry* tt::probe(uint64_t ZH) {
+  TTentry& entry = table[ZH & (size - 1)];
   if (entry.zhash == ZH) {
     return &entry;
   }
@@ -69,7 +69,7 @@ inline Entry* tt::probe(uint64_t ZH) {
 
 inline void tt::store(uint64_t ZH, Depth d, Eval e, Bound f, const Move& m) {
   // getting current entry
-  Entry& entry = table[ZH & (size - 1)];
+  TTentry& entry = table[ZH & (size - 1)];
 
   // check, that we can store or replace it
   if (entry.zhash == 0 || entry.zhash == ZH || d >= entry.depth) {

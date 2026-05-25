@@ -91,7 +91,7 @@ Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, Depth ply) {
 
   a = std::max(a, eval);
 
-  Entry* entry = TT->probe(pos.ZobristHash);
+  TTentry* entry = TT->probe(pos.ZobristHash);
   if (entry != nullptr) {
     Eval e = entry->eval;
 
@@ -189,7 +189,7 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, D
     return 0;
 
   // if we can use TT
-  Entry* entry = TT->probe(pos.ZobristHash);
+  TTentry* entry = TT->probe(pos.ZobristHash);
   if (entry != nullptr && entry->depth >= depth) {
     Eval eval = entry->eval;
 
@@ -346,7 +346,7 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
   }
 
   // if we can use TT
-  Entry* entry = TT->probe(pos.ZobristHash);
+  TTentry* entry = TT->probe(pos.ZobristHash);
 
   Move ttMove = Move();
   if (entry != nullptr) {
