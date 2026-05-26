@@ -7,11 +7,12 @@
 #include "types.h"
 #include <algorithm>
 #include <chrono>
-#include <future>
-#include <thread>
 
-std::atomic<bool> is_running = false;
-std::atomic<bool> stop = false;
+bool is_running = false;
+bool stop = false;
+
+long st, et;
+long timeToThink;
 
 int64_t perft(Depth depth, Position pos, rt* RT) {
   // leaf
@@ -69,6 +70,15 @@ Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, rt* RT, Depth
   if (!is_running) return 0;
 
   nodes++;
+
+  if ((nodes & 2047) == 0) {
+    et = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    if ((et - st) / 1'000'000 >= timeToThink) {
+      is_running = false;
+      stop = true;
+      return 0;
+    }
+  }
 
   // if there is a draw on the board, then you need to return 0
   if (pos.isRepetitionDraw(RT) || pos.isFiftyMoveDraw())
@@ -178,6 +188,15 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, r
   if (!is_running) return 0;
 
   nodes++;
+
+  if ((nodes & 2047) == 0) {
+    et = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    if ((et - st) / 1'000'000 >= timeToThink) {
+      is_running = false;
+      stop = true;
+      return 0;
+    }
+  }
 
   // if there is a draw on the board, then you need to return 0
   if (pos.isRepetitionDraw(RT) || pos.isFiftyMoveDraw())
@@ -406,8 +425,10 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
 std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, rt* RT, Depth maxDepth, long soft, long hard) {
 
   // start time
-  long start = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-  long end = start;
+  st = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+  et = st;
+
+  timeToThink = hard;
 
   Depth depth = 1;
 
@@ -429,39 +450,19 @@ std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, rt* RT, Depth 
 
   do {
 
-    is_running = true;
-
-    std::future<std::pair<Move, Eval>> result = std::async(search_root, pos, depth, -INF, INF, std::ref(nodes), TT, RT);
-
-    while (true) {
-
-      long elapsed = (end - start) / 1'000'000;
-
-      if (!is_running) {
-        break;
-      } else if (stop && depth > 1) {
-        break;
-      } else if (elapsed >= hard && depth > 1) {
-        break;
-      }
-
-      end = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-      std::this_thread::sleep_for(std::chrono::milliseconds(1));
-
-    }
+    std::pair<Move, Eval> result = search_root(pos, depth, -INF, INF, nodes, TT, RT);
 
     // time is up  or stop command received
-    if ((is_running || stop) && depth > 1) {
+    if (is_running || stop) {
       is_running = false;
       break;
     }
 
-    auto [bm, neval] = result.get();
-    BestMove = bm; eval = neval;
+    BestMove = result.first; eval = result.second;
 
-    end = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    et = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 
-    long Time = (end - start) / 1'000'000;
+    long Time = (et - st) / 1'000'000;
     int64_t nps = (Time > 0) ? (nodes * 1000 / Time) : 0;
 
     // UCI
@@ -475,15 +476,6 @@ std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, rt* RT, Depth 
               // it will print best move
               << convertMoveToString(BestMove)
               << std::endl;
-
-    // std::cerr << "info  depth " << toLen(depth, 4)
-    //           << " nodes " << toLen(nodes, 11)
-    //           << " nps " << toLen(nps, 9)
-    //           << " time " << toLen(Time, 8)
-    //           << " score " << score(eval)
-    //           << " pv "
-    //           << convertMoveToString(BestMove)
-    //           << std::endl;
 
     depth++;
 
