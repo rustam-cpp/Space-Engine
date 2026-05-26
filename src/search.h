@@ -9,9 +9,7 @@
 // leafs in search tree on a givved depth depth
 int64_t perft(Depth depth, Position pos, rt* RT);
 
-// returns the score how good or bad the move is
-inline Eval getScore(const Move& move);
-
+// this function picks move from the [start, moves.size()) interval
 void pickMove(std::vector<Move>& moves, int start, const Move& ttMove);
 
 // we cannot use static evaluation if it's a capture

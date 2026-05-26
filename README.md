@@ -39,7 +39,7 @@ So, it's a pretty fast move generation function, because I use many bit manipula
 
 ### Move ordering
 - TT best move is always first
-- captures/promotions ordering
+- MVV-LVA
 
 ### Time management
 - Soft and hard bounds

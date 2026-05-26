@@ -36,16 +36,6 @@ int64_t perft(Depth depth, Position pos, rt* RT) {
   return ans;
 }
 
-inline Eval getScore(const Move& move) {
-               // the worst possibillity is to lose moved piece
-  Eval score = - simp[getType(move.Moved)]
-               // but capturing oponent's piece is very good
-               + simp[getType(move.Captured)] * 10
-               // and promoting is pretty good
-               + simp[getType(move.PromotedTo)] * 4;
-  return score;
-}
-
 void pickMove(std::vector<Move>& moves, int start, const Move& ttMove) {
 
   int bestIndex = start;
@@ -54,7 +44,11 @@ void pickMove(std::vector<Move>& moves, int start, const Move& ttMove) {
   for (int i = start; i < (int)moves.size(); i++) {
 
     Move m = moves[i];
-    Eval score = getScore(m);
+
+    // MVV-LVA score
+    Eval score = mvv_lva[getType(m.Captured)][getType(m.Moved)];
+    // promotion score
+    score += simp[getType(m.PromotedTo)];
 
     if (m == ttMove) {
       bestIndex = i;
