@@ -4,6 +4,7 @@
 #include "tt.h"
 #include <random>
 #include <chrono>
+#include <deque>
 
 // debug function, that finds the count of all
 // leafs in search tree on a givved depth depth
@@ -20,7 +21,7 @@ Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, rt* RT, Depth
 
 // a search function created for calculating over
 // ~all moves, positions to calcualte the best move
-Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, rt* RT, Depth ply, Depth ext);
+Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, rt* RT, Depth ply, Depth ext, std::deque<Move>& pv);
 
 // finds the best move in the position
 std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval beta, int64_t& nodes, tt* TT, rt* RT);
