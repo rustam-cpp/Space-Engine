@@ -33,6 +33,8 @@ struct tt {
   TTentry* table;
   // size of this array
   int size;
+  // how many entries are used
+  int occupied;
   // constructor
   tt(int sizeMB) {
 
@@ -53,6 +55,9 @@ struct tt {
   inline void store(uint64_t ZH, Depth d, Eval e, Bound f, const Move& m);
   
   void clear();
+
+  inline int hashfull();
+
   // destructor
   ~tt() {
     delete[] table;
@@ -73,10 +78,15 @@ inline void tt::store(uint64_t ZH, Depth d, Eval e, Bound f, const Move& m) {
 
   // check, that we can store or replace it
   if (entry.zhash == 0 || entry.zhash == ZH || d >= entry.depth) {
+    occupied += entry.zhash == 0;
     entry.zhash = ZH;
     entry.depth = d;
     entry.eval = e;
     entry.flag = f;
     entry.bestMove = m;
   }
+}
+
+inline int tt::hashfull() {
+  return occupied * 1000ll / size;
 }

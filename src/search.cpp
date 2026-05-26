@@ -477,6 +477,7 @@ std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, rt* RT, Depth 
               << " seldepth " << toLen(seldepth, 4)
               << " nodes " << toLen(nodes, 11)
               << " nps " << toLen(nps, 9)
+              << " hashfull " << toLen(TT->hashfull(), 4)
               << " time " << toLen(Time, 8)
               << " score " << score(eval)
               << " pv "
