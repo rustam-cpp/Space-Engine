@@ -55,7 +55,7 @@ void processPositionCommand(Position& pos, rt* RT, std::string command) {
 }
 
 void processGoCommand(Position& pos, tt* TT, rt* RT, std::string command) {
-  Depth maxDepth = 64;
+  Depth maxDepth = MAX_PLY;
   // base time, increment
   long myTime = BIG_INF, myInc = 0;
   long moveTime = BIG_INF;

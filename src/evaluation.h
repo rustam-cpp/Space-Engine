@@ -3,7 +3,7 @@
 #include "board.h"
 #include "types.h"
 
-constexpr Eval simp[7] = {0, 100, 300, 310, 500, 900, 10000};
+constexpr Eval simp[7] = {0, 100, 300, 310, 500, 900, 100'000};
 
 constexpr Eval Weight[13][64] = {
   // none

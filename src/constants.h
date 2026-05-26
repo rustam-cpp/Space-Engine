@@ -5,13 +5,15 @@
 #include <string>
 #include <vector>
 
-const Eval Mate = 32'000;
+const Eval Mate = 2'000'000'000;
 
 // the evaluation we can't reach
-const Eval INF = 32'767;
+const Eval INF = 2'147'483'647;
 const int64_t BIG_INF = 9'000'000'000'000'000'000;
 
 const std::string StartFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+const Depth MAX_PLY = 64;
 
 const std::vector<std::pair<std::string, Depth>> benchPositions = {
   {"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 6},
@@ -35,11 +37,11 @@ const std::vector<std::pair<std::string, Depth>> benchPositions = {
 };
 
 constexpr Eval mvv_lva[7][7] = {
-  { 0, -100, -300, -310, -500, -900, -3000 },
-  { 1000, 900, 700, 690, 500, 100, -2000 },
-  { 3000, 2900, 2700, 2690, 2500, 2100, 0 },
-  { 3100, 3000, 2800, 2790, 2600, 2200, 100 },
-  { 5000, 4900, 4700, 4690, 4500, 4100, 2000 },
-  { 9000, 8900, 8700, 8690, 8500, 8100, 6000 },
-  { 30000, 29900, 29700, 29690, 29500, 29100, 27000 }
+  { 0, -100, -300, -310, -500, -900, -100000 },
+  { 1000, 900, 700, 690, 500, 100, -99000 },
+  { 3000, 2900, 2700, 2690, 2500, 2100, -97000 },
+  { 3100, 3000, 2800, 2790, 2600, 2200, -96900 },
+  { 5000, 4900, 4700, 4690, 4500, 4100, -95000 },
+  { 9000, 8900, 8700, 8690, 8500, 8100, -91000 },
+  { 1000000, 999900, 999700, 999690, 999500, 999100, 900000 }
 };

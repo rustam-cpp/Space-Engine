@@ -8,7 +8,7 @@ using Square = uint8_t;
 using File = uint8_t;
 using Rank = uint8_t;
 using Depth = int8_t;
-using Eval = int16_t;
+using Eval = int32_t;
 // Castling availability - 0bkqKQ
 using CastlingMask = uint8_t;
 constexpr Square NullSquare = 255;
