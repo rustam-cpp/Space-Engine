@@ -65,6 +65,8 @@ void pickMove(std::vector<Move>& moves, int start, const Move& ttMove) {
 
 }
 
+Depth seldepth;
+
 Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, rt* RT, Depth ply) {
 
   if (!is_running) return 0;
@@ -79,6 +81,8 @@ Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, rt* RT, Depth
       return 0;
     }
   }
+
+  seldepth = std::max(seldepth, ply);
 
   // if there is a draw on the board, then you need to return 0
   if (pos.isRepetitionDraw(RT) || pos.isFiftyMoveDraw())
@@ -450,6 +454,8 @@ std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, rt* RT, Depth 
 
   do {
 
+    seldepth = 0;
+
     std::pair<Move, Eval> result = search_root(pos, depth, -INF, INF, nodes, TT, RT);
 
     // time is up  or stop command received
@@ -468,6 +474,7 @@ std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, rt* RT, Depth 
     // UCI
 
     std::cout << "info  depth " << toLen(depth, 4)
+              << " seldepth " << toLen(seldepth, 4)
               << " nodes " << toLen(nodes, 11)
               << " nps " << toLen(nps, 9)
               << " time " << toLen(Time, 8)
