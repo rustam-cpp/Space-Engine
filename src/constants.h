@@ -9,11 +9,14 @@ const Eval Mate = 2'000'000'000;
 
 // the evaluation we can't reach
 const Eval INF = 2'147'483'647;
+
+// endless time to think (285388127853 years)
 const int64_t BIG_INF = 9'000'000'000'000'000'000;
 
 const std::string StartFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-const Depth MAX_PLY = 64;
+const Depth MAX_PLY = 127;
+const Depth MAX_DEPTH = 64;
 
 const std::vector<std::pair<std::string, Depth>> benchPositions = {
   {"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 6},

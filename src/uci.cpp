@@ -112,6 +112,7 @@ void processBenchCommand() {
   long start = std::chrono::high_resolution_clock::now().time_since_epoch().count();
   for (const auto& [fen, depth] : benchPositions) {
     tempTT->clear();
+    tempRT->clear();
     Pos.convertFromFen(fen, tempRT);
     nodes += iterative_depening(Pos, tempTT, tempRT, depth, BIG_INF, BIG_INF).second;
   }
