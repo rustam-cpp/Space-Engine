@@ -33,6 +33,9 @@ So, it's a pretty fast move generation function, because I use many bit manipula
 - Alpha-beta pruning
 - Iterative deepening
 - Transposition table
+- LMR
+- PVS
+- Check extention
 
 ### Move ordering
 - TT best move is always first
