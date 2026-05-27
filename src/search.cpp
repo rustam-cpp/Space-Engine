@@ -14,25 +14,29 @@ bool stop = false;
 long st, et;
 long timeToThink;
 
-int64_t perft(Depth depth, Position pos, rt* RT) {
+int64_t perft(Depth init, Depth depth, Position pos, rt* RT) {
   // leaf
   if (depth == 0) return 1;
   // all legal moves
   std::vector<Move> moves;
   generateMoves<false, false>(pos, moves, RT);
-  // if depth = 1 than the answer
-  // is count of all legal moves
-  if (depth == 1) return moves.size();
-  // answer of current node if depth > 1
   int64_t ans = 0;
   // we iterate over all moves
   for (const Move& move : moves) {
     // play move
     doMove(pos, move, RT);
     // do it recursively
-    ans += perft(depth - 1, pos, RT);
+    int64_t cur = perft(init, depth - 1, pos, RT);
+    ans += cur;
+    if (depth == init) {
+      std::cout << convertMoveToString(move);
+      std::cout << ": " << cur << std::endl;
+    }
     // undo move
     undoMove(pos, move, RT);
+  }
+  if (depth == init) {
+    std::cout << "nodes: " << ans << std::endl;
   }
   return ans;
 }

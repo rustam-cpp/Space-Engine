@@ -7,8 +7,8 @@
 #include <iostream>
 
 std::vector<std::pair<int, int>> dir = {
-  {-1, 1},
   {-1, -1},
+  {-1, 1},
   {1, -1},
   {1, 1},
   {-1, 0},
@@ -27,6 +27,8 @@ unsigned long long slide(int d, int l, int s) {
     if (r+x>=0 && r+x<8 && f+y>=0 && f+y<8) {
       r += x;
       f += y;
+    } else {
+      break;
     }
     ans |= 1ull << (r*8 + f);
   }

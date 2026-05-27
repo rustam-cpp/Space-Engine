@@ -72,6 +72,8 @@ int main(int argc, char* argv[]) {
       stopCommand();
     } else if (command == "bench") {
       processBenchCommand();
+    } else if (command == "perfttest") {
+      processPerftTestCommand();
     } else if (command.substr(0, 25) == "setoption name Hash value") {
       std::vector<std::string> cmd = split(command);
       // don't forget to free the allocated memory

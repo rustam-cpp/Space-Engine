@@ -8,7 +8,7 @@
 
 // debug function, that finds the count of all
 // leafs in search tree on a givved depth depth
-int64_t perft(Depth depth, Position pos, rt* RT);
+int64_t perft(Depth init, Depth depth, Position pos, rt* RT);
 
 // this function picks move from the [start, moves.size()) interval
 void pickMove(std::vector<Move>& moves, int start, const Move& ttMove);
