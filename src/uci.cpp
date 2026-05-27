@@ -122,3 +122,25 @@ void processBenchCommand() {
   delete tempTT;
   delete tempRT;
 }
+
+void processPerftTestCommand() {
+  Position Pos;
+  rt* tempRT = new rt;
+  int passed = 0;
+  int failed = 0;
+  int tn = 0;
+  for (auto [fen, d, ans] : perftPositions) {
+    Pos.convertFromFen(fen, tempRT);
+    int64_t res = perft(d, d, Pos, tempRT);
+    if (res == ans) {
+      passed++;
+      std::cout << "Test " << ++tn << " passed!" << std::endl;
+    } else {
+      failed++;
+      std::cout << "Test " << ++tn << " failed!" << std::endl;
+    }
+  }
+  std::cout << "passed " << passed << "/" << perftPositions.size();
+  std::cout << " failed " << failed << std::endl;
+  delete tempRT;
+}

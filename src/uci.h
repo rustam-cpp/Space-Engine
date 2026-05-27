@@ -17,3 +17,5 @@ void processPositionCommand(Position& pos, rt* RT, std::string command);
 void processGoCommand(Position& pos, tt* TT, rt* RT, std::string command);
 
 void processBenchCommand();
+
+void processPerftTestCommand();
