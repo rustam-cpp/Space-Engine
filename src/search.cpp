@@ -15,6 +15,7 @@ long st, et;
 long timeToThink;
 
 Move killer[MAX_PLY][2];
+int history[2][64][64];
 
 int64_t perft(Depth init, Depth depth, Position pos, rt* RT) {
   // leaf
@@ -43,7 +44,7 @@ int64_t perft(Depth init, Depth depth, Position pos, rt* RT) {
   return ans;
 }
 
-void pickMove(std::vector<Move>& moves, int start, const Move& ttMove, Depth ply) {
+void pickMove(bool WhiteToMove, std::vector<Move>& moves, int start, const Move& ttMove, Depth ply) {
 
   int bestIndex = start;
   Eval best = -INF;
@@ -67,6 +68,8 @@ void pickMove(std::vector<Move>& moves, int start, const Move& ttMove, Depth ply
         score = killer1;
       } else if (m == killer[ply][1]) {
         score = killer2;
+      } else {
+        score = history[WhiteToMove][m.From][m.To];
       }
     }
 
@@ -159,7 +162,7 @@ Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, rt* RT, Depth
 
     if (!is_running) break;
 
-    pickMove(moves, i, Move(), -1);
+    pickMove(pos.WhiteToMove, moves, i, Move(), -1);
 
     doMove(pos, moves[i], RT);
 
@@ -280,7 +283,7 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, r
 
     localPV.clear();
 
-    pickMove(moves, i, ttMove, ply);
+    pickMove(pos.WhiteToMove, moves, i, ttMove, ply);
 
     const Move move = moves[i];
 
@@ -344,6 +347,9 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, r
       if (!move.EnPassant &&
           getType(move.PromotedTo) == NONE &&
           getType(move.Captured) == NONE) {
+        // update history
+        history[pos.WhiteToMove][move.From][move.To] += depth * depth;
+        // update killers
         if (!(killer[ply][0] == move)) {
           killer[ply][1] = killer[ply][0];
           killer[ply][0] = move;
@@ -415,7 +421,7 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
 
     if (!is_running) return {BestMove, BestEval};
 
-    pickMove(moves, i, ttMove, -1);
+    pickMove(pos.WhiteToMove, moves, i, ttMove, -1);
 
     // don't forget to move
     doMove(pos, moves[i], RT);
@@ -466,6 +472,12 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
 
 // soft/hard bounds for time management
 std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, rt* RT, Depth maxDepth, long soft, long hard) {
+
+  memset(history, 0, sizeof(history));
+  for (Depth ply = 0; ply < MAX_PLY; ply++) {
+    killer[ply][0] = Move();
+    killer[ply][1] = Move();
+  }
 
   // start time
   st = std::chrono::high_resolution_clock::now().time_since_epoch().count();
