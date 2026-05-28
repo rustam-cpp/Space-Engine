@@ -11,7 +11,7 @@
 int64_t perft(Depth init, Depth depth, Position pos, rt* RT);
 
 // this function picks move from the [start, moves.size()) interval
-void pickMove(std::vector<Move>& moves, int start, const Move& ttMove);
+void pickMove(std::vector<Move>& moves, int start, const Move& ttMove, Depth ply);
 
 // we cannot use static evaluation if it's a capture
 // or a pawn promotion available in position, so
