@@ -14,6 +14,8 @@ bool stop = false;
 long st, et;
 long timeToThink;
 
+Move killer[MAX_PLY][2];
+
 int64_t perft(Depth init, Depth depth, Position pos, rt* RT) {
   // leaf
   if (depth == 0) return 1;
@@ -41,7 +43,7 @@ int64_t perft(Depth init, Depth depth, Position pos, rt* RT) {
   return ans;
 }
 
-void pickMove(std::vector<Move>& moves, int start, const Move& ttMove) {
+void pickMove(std::vector<Move>& moves, int start, const Move& ttMove, Depth ply) {
 
   int bestIndex = start;
   Eval best = -INF;
@@ -50,15 +52,25 @@ void pickMove(std::vector<Move>& moves, int start, const Move& ttMove) {
 
     Move m = moves[i];
 
-    // MVV-LVA score
-    Eval score = mvv_lva[getType(m.Captured)][getType(m.Moved)];
-    // promotion score
-    score += simp[getType(m.PromotedTo)];
+    Eval score = simp[getType(m.PromotedTo)];
 
+    // tt move
     if (m == ttMove) {
       bestIndex = i;
       break;
-    } else if (score > best) {
+    // MVV-LVA score
+    } else if (getType(m.Captured) != NONE) {
+      score += capture + mvv_lva[getType(m.Captured)][getType(m.Moved)];
+    // killer moves
+    } else if (ply >= 0) {
+      if (m == killer[ply][0]) {
+        score = killer1;
+      } else if (m == killer[ply][1]) {
+        score = killer2;
+      }
+    }
+
+    if (score > best) {
       best = score;
       bestIndex = i;
     }
@@ -147,7 +159,7 @@ Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, rt* RT, Depth
 
     if (!is_running) break;
 
-    pickMove(moves, i, Move());
+    pickMove(moves, i, Move(), -1);
 
     doMove(pos, moves[i], RT);
 
@@ -268,7 +280,7 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, r
 
     localPV.clear();
 
-    pickMove(moves, i, ttMove);
+    pickMove(moves, i, ttMove, ply);
 
     const Move move = moves[i];
 
@@ -327,8 +339,19 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, r
     a = std::max(a, eval);
 
     // beta cutoff
-    if (eval >= b)
+    if (eval >= b) {
+      // store killer if the move is quiet
+      if (!move.EnPassant &&
+          getType(move.PromotedTo) == NONE &&
+          getType(move.Captured) == NONE) {
+        if (!(killer[ply][0] == move)) {
+          killer[ply][1] = killer[ply][0];
+          killer[ply][0] = move;
+        }
+      }
+
       break;
+    }
   }
 
   Bound flag;
@@ -392,7 +415,7 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
 
     if (!is_running) return {BestMove, BestEval};
 
-    pickMove(moves, i, ttMove);
+    pickMove(moves, i, ttMove, -1);
 
     // don't forget to move
     doMove(pos, moves[i], RT);

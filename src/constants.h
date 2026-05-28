@@ -18,6 +18,11 @@ const std::string StartFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq
 const Depth MAX_PLY = 127;
 const Depth MAX_DEPTH = 64;
 
+// for move ordering
+const Eval capture = 1'000'000;
+const Eval killer1 = 900'000;
+const Eval killer2 = 800'000;
+
 const std::vector<std::pair<std::string, Depth>> benchPositions = {
   {"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 6},
   {"r1bqk2r/ppp2ppp/2np1n2/2b1p3/2B1P3/3P1N2/PPP2PPP/RNBQ1RK1 w kq - 0 6", 6},
