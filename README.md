@@ -40,6 +40,8 @@ So, it's a pretty fast move generation function, because I use many bit manipula
 ### Move ordering
 - TT best move is always first
 - MVV-LVA
+- History heuristic
+- Killer moves
 
 ### Time management
 - Soft and hard bounds
