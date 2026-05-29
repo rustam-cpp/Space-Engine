@@ -1,7 +1,6 @@
 #include "evaluation.h"
 #include "bits.h"
 #include "converts.h"
-#include "movegen.h"
 #include "types.h"
 
 template <PieceType T>

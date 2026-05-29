@@ -4,18 +4,6 @@
 #include "types.h"
 
 constexpr Eval simp[7] = {0, 100, 300, 310, 500, 900, 100'000};
-constexpr Eval attackWeight[7] = {0, 0, 40, 30, 50, 80, 0};
-
-// blockers in king safery evaluation
-// enemy pawn
-constexpr Eval eP = 6;
-// friendly pawn
-constexpr Eval fP = 3;
-// enemy piece
-constexpr Eval ep = 2;
-// friendly piece
-constexpr Eval fp = 1;
-
 
 constexpr Eval Weight[13][64] = {
   // none
