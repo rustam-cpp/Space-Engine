@@ -44,7 +44,13 @@ int64_t perft(Depth init, Depth depth, Position pos, rt* RT) {
   return ans;
 }
 
-void pickMove(bool WhiteToMove, std::vector<Move>& moves, int start, const Move& ttMove, Depth ply) {
+void pickMove(
+  bool WhiteToMove,
+  std::vector<Move>& moves,
+  int start,
+  const Move& ttMove,
+  Depth ply
+) {
 
   int bestIndex = start;
   Eval best = -INF;
@@ -86,7 +92,13 @@ void pickMove(bool WhiteToMove, std::vector<Move>& moves, int start, const Move&
 
 Depth seldepth;
 
-Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, rt* RT, Depth ply) {
+Eval qsearch(
+  Position pos,
+  Eval a, Eval b,
+  int64_t& nodes,
+  tt* TT, rt* RT,
+  Depth ply
+) {
 
   if (!is_running) return 0;
 
@@ -166,7 +178,13 @@ Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, rt* RT, Depth
 
     doMove(pos, moves[i], RT);
 
-    eval = -qsearch(pos, -b, -a, nodes, TT, RT, ply + 1);
+    eval = -qsearch(
+      pos,
+      -b, -a,
+      nodes,
+      TT, RT,
+      ply + 1
+    );
 
     undoMove(pos, moves[i], RT);
     
@@ -206,7 +224,16 @@ Eval qsearch(Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, rt* RT, Depth
 
 }
 
-Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, rt* RT, Depth ply, Depth ext, std::deque<Move>& pv) {
+Eval search(
+  Depth depth,
+  Position pos,
+  Eval a, Eval b,
+  int64_t& nodes,
+  tt* TT, rt* RT,
+  Depth ply,
+  Depth ext,
+  std::deque<Move>& pv
+) {
 
   if (!is_running) return 0;
 
@@ -246,7 +273,13 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, r
   
   // qsearch
   if (depth <= 0) {
-    return qsearch(pos, a, b, nodes, TT, RT, ply);
+    return qsearch(
+      pos,
+      a, b,
+      nodes,
+      TT, RT,
+      ply
+    );
   }
 
   // all legal moves
@@ -305,22 +338,68 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, r
       Depth r = (_log2(depth) * _log2(i + 1)) / 2;
       r = std::min((int)r, 2);
 
-      eval = -search(depth - 1 - r + e, pos, -a - 1, -a, nodes, TT, RT, ply + 1, ext + e, localPV);
+      eval = -search(
+        depth - 1 - r + e,
+        pos,
+        -a - 1, -a,
+        nodes,
+        TT, RT,
+        ply + 1,
+        ext + e,
+        localPV
+      );
 
       if (eval > a) {
-        eval = -search(depth - 1 + e, pos, -b, -a, nodes, TT, RT, ply + 1, ext + e, localPV);
+        eval = -search(
+          depth - 1 + e,
+          pos,
+          -b, -a,
+          nodes,
+          TT, RT,
+          ply + 1,
+          ext + e,
+          localPV
+        );
       }
 
     } else {
 
       // PVS (Principal Variation Search)
       if (i == 0) {
-        eval = -search(depth - 1 + e, pos, -b, -a, nodes, TT, RT, ply + 1, ext + e, localPV);
+        eval = -search(
+          depth - 1 + e,
+          pos,
+          -b, -a,
+          nodes,
+          TT, RT,
+          ply + 1,
+          ext + e,
+          localPV
+        );
       } else {
 
-        eval = -search(depth - 1 + e, pos, -a - 1, -a, nodes, TT, RT, ply + 1, ext + e, localPV);
+        eval = -search(
+          depth - 1 + e,
+          pos,
+          -a - 1, -a,
+          nodes,
+          TT, RT,
+          ply + 1,
+          ext + e,
+          localPV
+        );
+
         if (eval > a) {
-          eval = -search(depth - 1 + e, pos, -b, -a, nodes, TT, RT, ply + 1, ext + e, localPV);
+          eval = -search(
+            depth - 1 + e,
+            pos,
+            -b, -a,
+            nodes,
+            TT, RT,
+            ply + 1,
+            ext + e,
+            localPV
+          );
         }
 
       }
@@ -387,7 +466,13 @@ Eval search(Depth depth, Position pos, Eval a, Eval b, int64_t& nodes, tt* TT, r
 
 std::deque<Move> PV;
 
-std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval beta, int64_t& nodes, tt* TT, rt* RT) {
+std::pair<Move, Eval> search_root(
+  Position pos,
+  Depth depth,
+  Eval alpha, Eval beta,
+  int64_t& nodes,
+  tt* TT, rt* RT
+) {
 
   // the search is running now
   is_running = true;
@@ -429,7 +514,15 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
     std::deque<Move> pv;
 
     // we evaluate current position
-    Eval eval = -search(depth - 1, pos, -beta, -alpha, nodes, TT, RT, 0, 0, pv);
+    Eval eval = -search(
+      depth - 1,
+      pos,
+      -beta, -alpha,
+      nodes,
+      TT, RT,
+      0, 0,
+      pv
+    );
 
     // don't forget to undo this move
     undoMove(pos, moves[i], RT);
@@ -471,7 +564,12 @@ std::pair<Move, Eval> search_root(Position pos, Depth depth, Eval alpha, Eval be
 }
 
 // soft/hard bounds for time management
-std::pair<Move, int64_t> iterative_depening(Position pos, tt* TT, rt* RT, Depth maxDepth, long soft, long hard) {
+std::pair<Move, int64_t> iterative_depening(
+  Position pos,
+  tt* TT, rt* RT,
+  Depth maxDepth,
+  long soft, long hard
+) {
 
   memset(history, 0, sizeof(history));
   for (Depth ply = 0; ply < MAX_PLY; ply++) {
