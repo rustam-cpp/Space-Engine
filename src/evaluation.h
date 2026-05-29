@@ -163,4 +163,7 @@ Eval evalPieceSquareTable(const Position& pos,Eval Material);
 template <Color C>
 Eval evalPawns(const Position& pos);
 
+template <Color C>
+Eval evalKingSafety(const Position& pos);
+
 Eval evaluation(const Position& pos);

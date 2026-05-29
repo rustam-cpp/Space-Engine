@@ -23,45 +23,81 @@ Eval evalKingsInEngame(const Position& pos, Eval Material) {
   return (47 * (Material > 0 ? distB : distW) + 16 * (14 - distKings)) * 7 / 10;
 }
 
+template <Color C>
+Eval evalKingSafety(const Position& pos) {
+
+  // evaluation
+  Eval eval = 0;
+
+  // king square
+  Square S = FirstBit(pos.pieces[makePiece(C, KING)]);
+
+  // 1. PAWN SHIELD
+  if ((C == WHITE && getRank(S) <= 1) || (C == BLACK && getRank(S) >= 6))  {
+
+    // penalty for no luft
+    int sumdist = 0;
+
+    for (File f = std::max(0, (int)getFile(S) - 1); f <= std::min(7, (int)getFile(S) + 1); f++) {
+
+      Bitboard file = FileA << f;
+
+      // pawns on file f (variable)
+      Bitboard pawns = file & pos.pieces[makePiece(C, PAWN)];
+
+      // open file
+      if (pawns == 0) {
+        // open file is very bad
+        eval -= 70;
+      } else {
+
+        // distance to the 
+        int dist;
+        if (C == WHITE) {
+          dist = getRank(FirstBit(pawns)) - 1;
+        } else {
+          dist = 6 - getRank(LastBit(pawns));
+        }
+
+        eval += 30 - dist * 15;
+        sumdist += dist;
+
+      }
+
+    }
+
+    if (sumdist == 0) {
+      eval -= 20;
+    }
+
+  }
+
+  // enemy pawns
+  Bitboard pawnE = pos.pieces[swapColor(makePiece(C, PAWN))];
+  // enemy pieces (non pawn)
+  Bitboard pieceE = (C == BLACK ? pos.WhitePieces : pos.BlackPieces) ^ pawnE;
+
+  // 3. DISTANCE TO ENEMY PIECES
+  for (Square s = FirstBit(pieceE); s < 64; s = NextBit(pieceE, s)) {
+
+    int dist = abs(getRank(S) - getRank(s)) + abs(getFile(S) - getFile(s));
+    eval -= simp[getType(pos.getPiece(s))] / dist;
+
+  }
+
+  return eval;
+
+}
+
 template <PieceType T>
 Eval evalPieceSquareTable(const Position& pos, Eval Material) {
+
   Eval eval = 0;
   Eval eval2 = 0;
+
   if (T == KING) {
-    Square WhiteK = FirstBit(pos.pieces[makePiece(WHITE, KING)]);
-    Square BlackK = FirstBit(pos.pieces[makePiece(BLACK, KING)]);
-    Bitboard WkingShL = 0; // left
-    Bitboard WkingShM = 0; // middle
-    Bitboard WkingShR = 0; // right
-    // Square + 7 is [rank, file] -> [rank + 1, file - 1]
-    if (getFile(WhiteK) > 0) WkingShL |= Shield << (WhiteK + 7);
-    WkingShM |= Shield << (WhiteK + 8);
-    // Square + 9 is [rank, file] -> [rank + 1, file + 1]
-    if (getFile(WhiteK) < 7) WkingShR |= Shield << (WhiteK + 9);
-    Bitboard BkingShL = 0; // left
-    Bitboard BkingShM = 0; // middle
-    Bitboard BkingShR = 0; // right
-    // Square - 17 is [rank, file] -> [rank - 2, file - 1]
-    if (getFile(BlackK) > 0) BkingShL = Shield << (BlackK - 17);
-    BkingShM = Shield << (BlackK - 16);
-    // Square - 15 is [rank, file] -> [rank - 2, file + 1]
-    if (getFile(BlackK) < 7) BkingShR = Shield << (BlackK - 15);
-    // these formulas are made for speed things up
-    
-    // counting pawns that protect white king
-    int cntW = 0;
-    cntW += Count(WkingShL & pos.pieces[makePiece(WHITE, PAWN)]) >= 1;
-    cntW += Count(WkingShM & pos.pieces[makePiece(WHITE, PAWN)]) >= 1;
-    cntW += Count(WkingShR & pos.pieces[makePiece(WHITE, PAWN)]) >= 1;
-    // counting pawns that protect black king
-    int cntB = 0;
-    cntB += Count(BkingShL & pos.pieces[makePiece(BLACK, PAWN)]) >= 1;
-    cntB += Count(BkingShM & pos.pieces[makePiece(BLACK, PAWN)]) >= 1;
-    cntB += Count(BkingShR & pos.pieces[makePiece(BLACK, PAWN)]) >= 1;
-
-    eval += (cntW * 2 - 5) * 6 * ((((1ULL << WhiteK) & CastleRegion) != 0) * 4 + 1);
-    eval -= (cntB * 2 - 5) * 6 * ((((1ULL << BlackK) & (CastleRegion << 7)) != 0) * 4 + 1);
-
+    eval += evalKingSafety<WHITE>(pos);
+    eval -= evalKingSafety<BLACK>(pos);
     eval2 = evalKingsInEngame(pos, Material);
   }
 
@@ -100,6 +136,7 @@ Eval evalPieceSquareTable(const Position& pos, Eval Material) {
   } else {
     return eval;
   }
+
 }
 
 template <Color C>
