@@ -73,6 +73,19 @@ Eval evalKingSafety(const Position& pos) {
 
   }
 
+  // enemy pawns
+  Bitboard pawnE = pos.pieces[swapColor(makePiece(C, PAWN))];
+  // enemy pieces (non pawn)
+  Bitboard pieceE = (C == BLACK ? pos.WhitePieces : pos.BlackPieces) ^ pawnE;
+
+  // 3. DISTANCE TO ENEMY PIECES
+  for (Square s = FirstBit(pieceE); s < 64; s = NextBit(pieceE, s)) {
+
+    int dist = abs(getRank(S) - getRank(s)) + abs(getFile(S) - getFile(s));
+    eval -= simp[getType(pos.getPiece(s))] / dist;
+
+  }
+
   return eval;
 
 }
