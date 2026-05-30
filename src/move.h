@@ -25,7 +25,11 @@ struct Move {
 };
 
 Move makeMove(const Position& pos, Square From, Square To, Piece PromotedTo);
+
 void doMove(Position& pos, const Move& move, rt* RT);
 void undoMove(Position& pos, const Move& move, rt* RT);
+
+void doNullMove(Position& pos, rt* RT);
+void undoNullMove(Position& pos, rt* RT);
 
 uint64_t hashMove(const Move& move);
