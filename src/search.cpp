@@ -282,12 +282,14 @@ Eval search(
     );
   }
 
+  bool isCheck = inCheck(pos);
+
   // all legal moves
   std::vector<Move> moves;
   generateMoves<false, false>(pos, moves, RT);
 
   if (moves.empty()) {
-    if (inCheck(pos))
+    if (isCheck)
       // checkmate on the board
       return -Mate + ply;
     else
@@ -306,9 +308,44 @@ Eval search(
   // the future best evaluation and best move
   Eval Best = -INF;
 
-  Move bestMove;
+  Move bestMove = Move();
 
   std::deque<Move> localPV;
+
+  // null move pruning
+  if (depth >= 3 &&
+      !isCheck &&
+      a + 1 == b &&
+      evalNonPawnMaterial(pos) != 0) {
+
+    // en passant square
+    Square eps = pos.EnPassantSquare;
+
+    Depth r = 2 + depth / 6;
+
+    doNullMove(pos, RT);
+
+    Eval eval = -search(
+      depth - 1 - r,
+      pos,
+      -b, -b + 1,
+      nodes,
+      TT, RT,
+      ply + 1,
+      ext,
+      localPV
+    );
+
+    undoNullMove(pos, RT);
+
+    pos.EnPassantSquare = eps;
+
+    if (eval >= b) {
+      Best = eval;
+      moves.clear();
+    }
+
+  }
 
   for (int i = 0; i < (int)moves.size(); i++) {
 
@@ -327,7 +364,7 @@ Eval search(
 
     Eval eval;
 
-    bool isCheck = inCheck(pos);
+    isCheck = inCheck(pos);
 
     Depth e = 0;
     e += (isCheck && ext < 16 ? 1 : 0);

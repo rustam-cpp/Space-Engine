@@ -180,6 +180,38 @@ void undoMove(Position& pos, const Move& move, rt* RT) {
 
 }
 
+void doNullMove(Position& pos, rt* RT) {
+
+  pos.ZobristHash ^= pos.EnPassantSquare << 12;
+  pos.EnPassantSquare = -1;
+  pos.ZobristHash ^= pos.EnPassantSquare << 12;
+
+  if (!pos.WhiteToMove) pos.FullmoveClock++;
+
+  pos.ZobristHash ^= pos.WhiteToMove << 4;
+  pos.WhiteToMove = !pos.WhiteToMove;
+  pos.ZobristHash ^= pos.WhiteToMove << 4;
+
+  pos.HalfmoveClock++;
+
+  RT->add(pos.ZobristHash);
+
+}
+
+void undoNullMove(Position& pos, rt* RT) {
+
+  RT->del();
+
+  pos.HalfmoveClock--;
+
+  if (pos.WhiteToMove) pos.FullmoveClock--;
+
+  pos.WhiteToMove = !pos.WhiteToMove;
+
+  pos.ZobristHash = RT->stack.back();
+
+}
+
 uint64_t hashMove(const Move& move) {
   return           (move.From << 19) ^
                    (move.To << 26) ^

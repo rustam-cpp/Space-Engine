@@ -152,10 +152,12 @@ constexpr Eval Weight[13][64] = {
   },
 };
 
-Eval evalKingsInEngame(const Position& pos, Eval Material);
-
 template <PieceType T>
 Eval evalPieceType(const Position& pos);
+
+Eval evalNonPawnMaterial(const Position& pos);
+
+Eval evalKingsInEngame(const Position& pos, Eval Material);
 
 template <PieceType T>
 Eval evalPieceSquareTable(const Position& pos,Eval Material);

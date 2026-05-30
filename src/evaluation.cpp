@@ -11,6 +11,15 @@ Eval evalPieceType(const Position& pos) {
   return eval * simp[T];
 }
 
+Eval evalNonPawnMaterial(const Position& pos) {
+  Eval eval = 0;
+  eval += evalPieceType<KNIGHT>(pos);
+  eval += evalPieceType<BISHOP>(pos);
+  eval += evalPieceType<ROOK>(pos);
+  eval += evalPieceType<QUEEN>(pos);
+  return eval;
+}
+
 Eval evalKingsInEngame(const Position& pos, Eval Material) {
   Square WhiteK = FirstBit(pos.pieces[makePiece(WHITE, KING)]);
   Square BlackK = FirstBit(pos.pieces[makePiece(BLACK, KING)]);
@@ -198,12 +207,8 @@ Eval evalPawns(const Position& pos) {
 Eval evaluation(const Position& pos) {
   Eval eval = 0;
   // material
-  Eval material = 0;
+  Eval material = evalNonPawnMaterial(pos);
   material += evalPieceType<PAWN>(pos);
-  material += evalPieceType<KNIGHT>(pos);
-  material += evalPieceType<BISHOP>(pos);
-  material += evalPieceType<ROOK>(pos);
-  material += evalPieceType<QUEEN>(pos);
   eval += material;
   // piece square tables
   eval += evalPieceSquareTable<PAWN>(pos, material);
