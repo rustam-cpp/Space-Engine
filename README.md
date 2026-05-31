@@ -35,7 +35,9 @@ So, it's a pretty fast move generation function, because I use many bit manipula
 - Transposition table
 - LMR
 - PVS
+- NMP
 - Check extention
+- Aspiration window
 
 ### Move ordering
 - TT best move is always first
