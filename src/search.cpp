@@ -600,7 +600,6 @@ std::pair<Move, Eval> search_root(
 
 }
 
-// soft/hard bounds for time management
 std::pair<Move, int64_t> iterative_depening(
   Position pos,
   tt* TT, rt* RT,
@@ -638,11 +637,74 @@ std::pair<Move, int64_t> iterative_depening(
 
   stop = false;
 
-  do {
+  auto runSearch = [&](Eval alpha, Eval beta) {
 
     seldepth = 0;
 
-    std::pair<Move, Eval> result = search_root(pos, depth, -INF, INF, nodes, TT, RT);
+    std::pair<Move, Eval> result = {Move(), -INF};
+
+    if (!(is_running || stop)) {
+      result = search_root(pos, depth, alpha, beta, nodes, TT, RT);
+    }
+
+    if (is_running || stop) {
+      is_running = false;
+    }
+
+    return result;
+
+  };
+
+  do {
+
+    // aspiration window
+
+    std::pair<Move, Eval> result;
+
+    if (depth <= 4) {
+
+      result = runSearch(-INF, INF);
+
+    } else {
+
+      Eval score = eval;
+      Eval window = 20;
+
+      Eval alpha = score - window;
+      Eval beta = score + window;
+
+      bool needFullSearch = true;
+
+      while (window <= 80) {
+
+        result = runSearch(alpha, beta);
+
+        if (is_running || stop) {
+          is_running = false;
+          needFullSearch = false;
+          break;
+        }
+
+        score = result.second;
+
+        if (score <= alpha) {
+          alpha -= window;
+        } else if (score >= beta) {
+          beta += window;
+        } else {
+          needFullSearch = false;
+          break;
+        }
+
+        window *= 2;
+
+      }
+
+      if (needFullSearch) {
+        result = runSearch(-INF, INF);
+      }
+
+    }
 
     // time is up  or stop command received
     if (is_running || stop) {
@@ -650,7 +712,8 @@ std::pair<Move, int64_t> iterative_depening(
       break;
     }
 
-    BestMove = result.first; eval = result.second;
+    BestMove = result.first;
+    eval = result.second;
 
     et = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 
