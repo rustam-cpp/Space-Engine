@@ -204,6 +204,12 @@ Eval evalPawns(const Position& pos) {
   return eval;
 }
 
+template <Color C>
+Eval evalBishopPair(const Position& pos) {
+  Bitboard Bishops = pos.pieces[makePiece(C, BISHOP)];
+  return (Count(Bishops) >= 2 ? 30 : 0);
+}
+
 Eval evaluation(const Position& pos) {
   Eval eval = 0;
   // material
@@ -220,6 +226,9 @@ Eval evaluation(const Position& pos) {
   // special evaluation for pawn structure
   eval += evalPawns<WHITE>(pos);
   eval -= evalPawns<BLACK>(pos);
+  // bishop pair evaluation
+  eval += evalBishopPair<WHITE>(pos);
+  eval -= evalBishopPair<BLACK>(pos);
   // position good for white is bad for black
   int mul = (pos.WhiteToMove ? 1 : -1);
   // final evaluation

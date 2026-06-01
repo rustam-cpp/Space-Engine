@@ -168,4 +168,7 @@ Eval evalPawns(const Position& pos);
 template <Color C>
 Eval evalKingSafety(const Position& pos);
 
+template <Color C>
+Eval evalBishopPair(const Position& pos);
+
 Eval evaluation(const Position& pos);
