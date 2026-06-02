@@ -57,7 +57,7 @@ Eval evalKingSafety(const Position& pos) {
       // open file
       if (pawns == 0) {
         // open file is very bad
-        eval -= 70;
+        eval -= kingNearbyOpenFilePenalty;
       } else {
 
         // distance to the 
@@ -76,7 +76,7 @@ Eval evalKingSafety(const Position& pos) {
     }
 
     if (sumdist == 0) {
-      eval -= 20;
+      eval -= noLuftPenalty;
     }
 
   }
@@ -188,16 +188,16 @@ Eval evalPawns(const Position& pos) {
       cur += Weight[7][(C == WHITE ? i : swapRank(i))];
       if ((pos.pieces[P] & (Prev ^ PrevM)) != 0ULL) {
         // protected
-        cur += 30;
+        cur += protectedPassedPawnBonus;
       }
     }
     if ((pos.pieces[P] & (Prev ^ PrevM)) == 0ULL) {
       // isolated pawn
-      cur -= 25;
+      cur -= isolatedPawnPenalty;
     }
     if ((pos.pieces[P] & NextM) != 0ULL) {
       // doubled
-      cur -= 40;
+      cur -= doubledPawnPenalty;
     }
     eval += cur;
   }
@@ -207,7 +207,7 @@ Eval evalPawns(const Position& pos) {
 template <Color C>
 Eval evalBishopPair(const Position& pos) {
   Bitboard Bishops = pos.pieces[makePiece(C, BISHOP)];
-  return (Count(Bishops) >= 2 ? 30 : 0);
+  return (Count(Bishops) >= 2 ? bishopPairBonus : 0);
 }
 
 Eval evaluation(const Position& pos) {

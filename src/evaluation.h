@@ -5,6 +5,14 @@
 
 constexpr Eval simp[7] = {0, 100, 300, 310, 500, 900, 100'000};
 
+// constants
+constexpr Eval kingNearbyOpenFilePenalty = 70;
+constexpr Eval noLuftPenalty = 20;
+constexpr Eval protectedPassedPawnBonus = 30;
+constexpr Eval isolatedPawnPenalty = 25;
+constexpr Eval doubledPawnPenalty = 40;
+constexpr Eval bishopPairBonus = 30;
+
 constexpr Eval Weight[13][64] = {
   // none
   {
