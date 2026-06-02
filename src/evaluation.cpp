@@ -3,6 +3,15 @@
 #include "converts.h"
 #include "types.h"
 
+Eval simp[7] = {0, 100, 300, 310, 500, 900, 100'000};
+
+Eval kingNearbyOpenFilePenalty = 70;
+Eval noLuftPenalty = 20;
+Eval protectedPassedPawnBonus = 30;
+Eval isolatedPawnPenalty = 25;
+Eval doubledPawnPenalty = 40;
+Eval bishopPairBonus = 30;
+
 template <PieceType T>
 Eval evalPieceType(const Position& pos) {
   Eval eval = 0;

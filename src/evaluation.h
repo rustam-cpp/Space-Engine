@@ -3,15 +3,15 @@
 #include "board.h"
 #include "types.h"
 
-constexpr Eval simp[7] = {0, 100, 300, 310, 500, 900, 100'000};
+extern Eval simp[7];
 
 // constants
-constexpr Eval kingNearbyOpenFilePenalty = 70;
-constexpr Eval noLuftPenalty = 20;
-constexpr Eval protectedPassedPawnBonus = 30;
-constexpr Eval isolatedPawnPenalty = 25;
-constexpr Eval doubledPawnPenalty = 40;
-constexpr Eval bishopPairBonus = 30;
+extern Eval kingNearbyOpenFilePenalty;
+extern Eval noLuftPenalty;
+extern Eval protectedPassedPawnBonus;
+extern Eval isolatedPawnPenalty;
+extern Eval doubledPawnPenalty;
+extern Eval bishopPairBonus;
 
 constexpr Eval Weight[13][64] = {
   // none

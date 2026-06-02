@@ -16,6 +16,9 @@ void processPositionCommand(Position& pos, rt* RT, std::string command);
 // go command
 void processGoCommand(Position& pos, tt* TT, rt* RT, std::string command);
 
+// setoption command
+void processSetoptionCommand(std::string command);
+
 void processBenchCommand();
 
 void processPerftTestCommand();

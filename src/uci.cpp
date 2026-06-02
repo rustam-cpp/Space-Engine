@@ -3,6 +3,7 @@
 #include "converts.h"
 #include "search.h"
 #include "timeman.h"
+#include "evaluation.h"
 
 std::vector<std::string> split(std::string command) {
   // the final result
@@ -102,6 +103,44 @@ void processGoCommand(Position& pos, tt* TT, rt* RT, std::string command) {
     bestmove = bm;
   }
   std::cout << "bestmove " << convertMoveToString(bestmove) << std::endl;
+}
+
+void processSetoptionCommand(std::string command) {
+  std::vector<std::string> cmd = split(command);
+  std::string name;
+  Eval value;
+  for (int i = 0; i < (int)cmd.size(); i++) {
+    if (cmd[i] == "name") {
+      if (i + 1 < (int)cmd.size()) {
+        name = cmd[i + 1];
+      }
+    } else if (cmd[i] == "value") {
+      if (i + 1 < (int)cmd.size()) {
+        value = stoi(cmd[i + 1]);
+      }
+    }
+  }
+  if (name == "knight") {
+    simp[KNIGHT] = value;
+  } else if (name == "bishop") {
+    simp[BISHOP] = value;
+  } else if (name == "rook") {
+    simp[ROOK] = value;
+  } else if (name == "queen") {
+    simp[QUEEN] = value;
+  } else if (name == "kingNearbyOpenFilePenalty") {
+    kingNearbyOpenFilePenalty = value;
+  } else if (name == "noLuftPenalty") {
+    noLuftPenalty = value;
+  } else if (name == "protectedPassedPawnBonus") {
+    protectedPassedPawnBonus = value;
+  } else if (name == "isolatedPawnPenalty") {
+    isolatedPawnPenalty = value;
+  } else if (name == "doubledPawnPenalty") {
+    doubledPawnPenalty = value;
+  } else if (name == "bishopPairBonus") {
+    bishopPairBonus = value;
+  }
 }
 
 void processBenchCommand() {
