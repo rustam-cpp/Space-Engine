@@ -27,6 +27,7 @@ So, it's a pretty fast move generation function, because I use many bit manipula
 - Piece square tables
 - Pawn and king in the endgame evaluation with a smooth transition from opening/middlegame to endgame
 - King protection (pawn shield)
+- Bishop pair bonus
 
 ### Search
 - Quiescence search
