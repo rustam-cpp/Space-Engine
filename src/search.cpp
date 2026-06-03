@@ -237,6 +237,8 @@ Eval search(
 
   if (!is_running) return 0;
 
+  seldepth = std::max(seldepth, ply);
+
   nodes++;
 
   if ((nodes & 2047) == 0) {
