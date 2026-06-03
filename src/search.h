@@ -25,7 +25,7 @@ void pickMove(
 // all captures and pawn promotions
 Eval qsearch(
   Position pos,
-  Eval a, Eval b,
+  Eval alpha, Eval beta,
   int64_t& nodes,
   tt* TT, rt* RT,
   Depth ply
@@ -36,7 +36,7 @@ Eval qsearch(
 Eval search(
   Depth depth,
   Position pos,
-  Eval a, Eval b,
+  Eval alpha, Eval beta,
   int64_t& nodes,
   tt* TT, rt* RT,
   Depth ply,

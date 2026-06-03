@@ -94,7 +94,7 @@ Depth seldepth;
 
 Eval qsearch(
   Position pos,
-  Eval a, Eval b,
+  Eval alpha, Eval beta,
   int64_t& nodes,
   tt* TT, rt* RT,
   Depth ply
@@ -123,12 +123,12 @@ Eval qsearch(
   Eval eval = evaluation(pos);
 
   // fail-high
-  if (eval >= b)
+  if (eval >= beta)
     return eval;
 
-  Eval oA = a;
+  Eval original_alpha = alpha;
 
-  a = std::max(a, eval);
+  alpha = std::max(alpha, eval);
 
   TTentry* entry = TT->probe(pos.ZobristHash);
   if (entry != nullptr) {
@@ -142,9 +142,9 @@ Eval qsearch(
 
     if (entry->flag == EXACT)
       return e;
-    if (entry->flag == LOWER && e >= b)
+    if (entry->flag == LOWER && e >= beta)
       return e;
-    if (entry->flag == UPPER && e <= a)
+    if (entry->flag == UPPER && e <= alpha)
       return e;
   }
 
@@ -180,7 +180,7 @@ Eval qsearch(
 
     eval = -qsearch(
       pos,
-      -b, -a,
+      -beta, -alpha,
       nodes,
       TT, RT,
       ply + 1
@@ -188,12 +188,12 @@ Eval qsearch(
 
     undoMove(pos, moves[i], RT);
     
-    if (eval > a) {
+    if (eval > alpha) {
       bestMove = moves[i];
-      a = eval;
+      alpha = eval;
     }
 
-    if (eval >= b) {
+    if (eval >= beta) {
       break;
     }
 
@@ -201,15 +201,15 @@ Eval qsearch(
 
   Bound flag;
 
-  if (a <= oA)
+  if (alpha <= original_alpha)
     flag = UPPER;
-  else if (a >= b)
+  else if (alpha >= beta)
     flag = LOWER;
   else
     flag = EXACT;
 
   // store evaluation
-  Eval sE = a;
+  Eval sE = alpha;
   
   // mate normalization
   if (sE > Mate - 1000)
@@ -220,14 +220,14 @@ Eval qsearch(
 
   TT->store(pos.ZobristHash, 0, sE, flag, bestMove);
 
-  return a;
+  return alpha;
 
 }
 
 Eval search(
   Depth depth,
   Position pos,
-  Eval a, Eval b,
+  Eval alpha, Eval beta,
   int64_t& nodes,
   tt* TT, rt* RT,
   Depth ply,
@@ -265,9 +265,9 @@ Eval search(
 
     if (entry->flag == EXACT)
       return eval;
-    if (entry->flag == LOWER && eval >= b)
+    if (entry->flag == LOWER && eval >= beta)
       return eval;
-    if (entry->flag == UPPER && eval <= a)
+    if (entry->flag == UPPER && eval <= alpha)
       return eval;
   }
   
@@ -275,7 +275,7 @@ Eval search(
   if (depth <= 0) {
     return qsearch(
       pos,
-      a, b,
+      alpha, beta,
       nodes,
       TT, RT,
       ply
@@ -303,7 +303,7 @@ Eval search(
   }
 
   // original alpha
-  Eval oA = a;
+  Eval original_alpha = alpha;
 
   // the future best evaluation and best move
   Eval Best = -INF;
@@ -315,7 +315,7 @@ Eval search(
   // null move pruning
   if (depth >= 3 &&
       !isCheck &&
-      a + 1 == b &&
+      alpha + 1 == beta &&
       evalNonPawnMaterial(pos) != 0) {
 
     // en passant square
@@ -328,7 +328,7 @@ Eval search(
     Eval eval = -search(
       depth - 1 - r,
       pos,
-      -b, -b + 1,
+      -beta, -beta + 1,
       nodes,
       TT, RT,
       ply + 1,
@@ -340,7 +340,7 @@ Eval search(
 
     pos.EnPassantSquare = eps;
 
-    if (eval >= b) {
+    if (eval >= beta) {
       Best = eval;
       moves.clear();
     }
@@ -378,7 +378,7 @@ Eval search(
       eval = -search(
         depth - 1 - r + e,
         pos,
-        -a - 1, -a,
+        -alpha - 1, -alpha,
         nodes,
         TT, RT,
         ply + 1,
@@ -386,11 +386,11 @@ Eval search(
         localPV
       );
 
-      if (eval > a) {
+      if (eval > alpha) {
         eval = -search(
           depth - 1 + e,
           pos,
-          -b, -a,
+          -beta, -alpha,
           nodes,
           TT, RT,
           ply + 1,
@@ -406,7 +406,7 @@ Eval search(
         eval = -search(
           depth - 1 + e,
           pos,
-          -b, -a,
+          -beta, -alpha,
           nodes,
           TT, RT,
           ply + 1,
@@ -418,7 +418,7 @@ Eval search(
         eval = -search(
           depth - 1 + e,
           pos,
-          -a - 1, -a,
+          -alpha - 1, -alpha,
           nodes,
           TT, RT,
           ply + 1,
@@ -426,11 +426,11 @@ Eval search(
           localPV
         );
 
-        if (eval > a) {
+        if (eval > alpha) {
           eval = -search(
             depth - 1 + e,
             pos,
-            -b, -a,
+            -beta, -alpha,
             nodes,
             TT, RT,
             ply + 1,
@@ -455,10 +455,10 @@ Eval search(
       pv = localPV;
     }
 
-    a = std::max(a, eval);
+    alpha = std::max(alpha, eval);
 
     // beta cutoff
-    if (eval >= b) {
+    if (eval >= beta) {
       // store killer if the move is quiet
       if (!move.EnPassant &&
           getType(move.PromotedTo) == NONE &&
@@ -478,9 +478,9 @@ Eval search(
 
   Bound flag;
 
-  if (Best <= oA)
+  if (Best <= original_alpha)
     flag = UPPER;
-  else if (Best >= b)
+  else if (Best >= beta)
     flag = LOWER;
   else
     flag = EXACT;
