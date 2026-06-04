@@ -134,7 +134,7 @@ void outBb(Bitboard bb);
 // adds length(x) - len spaces (' ') to x
 std::string toLen(int64_t x, int len);
 
-inline std::string score(Eval eval) {
+inline std::string Score(Eval eval) {
   // engine mates
   if (eval > Mate - 1000) {
     return "mate  " + toLen((Mate - eval + 2) / 2, 5);

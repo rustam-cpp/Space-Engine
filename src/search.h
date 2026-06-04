@@ -45,7 +45,7 @@ Eval search(
 );
 
 // finds the best move in the position
-std::pair<Move, Eval> search_root(
+Eval search_root(
   Position pos,
   Depth depth,
   Eval alpha, Eval beta,
