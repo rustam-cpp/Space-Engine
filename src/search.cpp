@@ -256,6 +256,13 @@ Eval search(
 
   // if we can use TT
   TTentry* entry = TT->probe(pos.ZobristHash);
+
+  // best move from TT
+  Move ttMove = Move();
+  if (entry != nullptr) {
+    ttMove = entry->bestMove;
+  }
+
   if (entry != nullptr && entry->depth >= depth) {
     Eval eval = entry->eval;
 
@@ -265,12 +272,19 @@ Eval search(
     if (eval < -Mate + 1000)
       eval += ply;
 
-    if (entry->flag == EXACT)
+    if (entry->flag == EXACT) {
+      if (!(ttMove == Move()))
+        pv = {ttMove};
       return eval;
-    if (entry->flag == LOWER && eval >= beta)
+    } else if (entry->flag == LOWER && eval >= beta) {
+      if (!(ttMove == Move()))
+        pv = {ttMove};
       return eval;
-    if (entry->flag == UPPER && eval <= alpha)
+    } else if (entry->flag == UPPER && eval <= alpha) {
+      if (!(ttMove == Move()))
+        pv = {ttMove};
       return eval;
+    }
   }
   
   // qsearch
@@ -297,11 +311,6 @@ Eval search(
     else
       // stalemate on the board
       return 0;
-  }
-
-  Move ttMove = Move();
-  if (entry != nullptr) {
-    ttMove = entry->bestMove;
   }
 
   // original alpha
@@ -505,7 +514,7 @@ Eval search(
 
 std::deque<Move> PV;
 
-std::pair<Move, Eval> search_root(
+Eval search_root(
   Position pos,
   Depth depth,
   Eval alpha, Eval beta,
@@ -513,92 +522,24 @@ std::pair<Move, Eval> search_root(
   tt* TT, rt* RT
 ) {
 
-  // the search is running now
-  is_running = true;
-
-  // original alpha
-  Eval oA = alpha;
-
-  // we will look at every legal move in the position
-  std::vector<Move> moves;
-  generateMoves<false, false>(pos, moves, RT);
-
-  // if it is already mate or stalemate
-  if (moves.empty()) {
-    return {Move(), (inCheck(pos) ? -Mate : 0)};
-  }
-
-  // if we can use TT
-  TTentry* entry = TT->probe(pos.ZobristHash);
-
-  Move ttMove = Move();
-  if (entry != nullptr) {
-    ttMove = entry->bestMove;
-  }
+  PV.clear();
   
-  // and this is the best move evaluation
-  Eval BestEval = -INF;
-  // best move
-  Move BestMove;
+  is_running = true;
+  
+  Eval eval = search(
+    depth,
+    pos,
+    alpha, beta,
+    nodes,
+    TT, RT,
+    0,
+    0,
+    PV
+  );
 
-  for (int i = 0; i < (int)moves.size(); i++) {
-
-    if (!is_running) return {BestMove, BestEval};
-
-    pickMove(pos.WhiteToMove, moves, i, ttMove, -1);
-
-    // don't forget to move
-    doMove(pos, moves[i], RT);
-
-    std::deque<Move> pv;
-
-    // we evaluate current position
-    Eval eval = -search(
-      depth - 1,
-      pos,
-      -beta, -alpha,
-      nodes,
-      TT, RT,
-      0, 0,
-      pv
-    );
-
-    // don't forget to undo this move
-    undoMove(pos, moves[i], RT);
-
-    // if we better than all previous moves
-    if (eval > BestEval) {
-      BestMove = moves[i];
-      BestEval = eval;
-      PV = pv;
-      PV.push_front(moves[i]);
-    }
-
-    alpha = std::max(alpha, eval);
-
-    if (alpha >= beta)
-      break;
-
-    // std::cerr << convertMoveToString(move) << ": " << eval << std::endl;
-
-  }
-
-  Bound flag;
-
-  if (BestEval <= oA)
-    flag = UPPER;
-  else if (BestEval >= beta)
-    flag = LOWER;
-  else
-    flag = EXACT;
-
-  TT->store(pos.ZobristHash, depth, BestEval, flag, BestMove);
-
-  // now we are not running
   is_running = false;
 
-  // and return values
-  return {BestMove, BestEval};
+  return eval;
 
 }
 
@@ -643,17 +584,17 @@ std::pair<Move, int64_t> iterative_depening(
 
     seldepth = 0;
 
-    std::pair<Move, Eval> result = {Move(), -INF};
+    Eval score = -INF;
 
     if (!(is_running || stop)) {
-      result = search_root(pos, depth, alpha, beta, nodes, TT, RT);
+      score = search_root(pos, depth, alpha, beta, nodes, TT, RT);
     }
 
     if (is_running || stop) {
       is_running = false;
     }
 
-    return result;
+    return score;
 
   };
 
@@ -661,7 +602,7 @@ std::pair<Move, int64_t> iterative_depening(
 
     // aspiration window
 
-    std::pair<Move, Eval> result;
+    Eval result;
 
     if (depth <= 4) {
 
@@ -679,7 +620,7 @@ std::pair<Move, int64_t> iterative_depening(
 
       while (window <= 80) {
 
-        result = runSearch(alpha, beta);
+        score = runSearch(alpha, beta);
 
         if (is_running || stop) {
           is_running = false;
@@ -687,14 +628,13 @@ std::pair<Move, int64_t> iterative_depening(
           break;
         }
 
-        score = result.second;
-
         if (score <= alpha) {
           alpha -= window;
         } else if (score >= beta) {
           beta += window;
         } else {
           needFullSearch = false;
+          result = score;
           break;
         }
 
@@ -714,8 +654,8 @@ std::pair<Move, int64_t> iterative_depening(
       break;
     }
 
-    BestMove = result.first;
-    eval = result.second;
+    BestMove = PV[0];
+    eval = result;
 
     et = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 
@@ -730,7 +670,7 @@ std::pair<Move, int64_t> iterative_depening(
               << " nps " << toLen(nps, 9)
               << " hashfull " << toLen(TT->hashfull(), 4)
               << " time " << toLen(Time, 8)
-              << " score " << score(eval)
+              << " score " << Score(eval)
               << " pv ";
     for (const Move& move : PV) {
       std::cout << convertMoveToString(move) << ' ';
