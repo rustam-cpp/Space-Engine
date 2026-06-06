@@ -30,7 +30,6 @@ int main(int argc, char* argv[]) {
   // board
   Position* pos = new Position;
   pos->convertFromFen(StartFen, RT);
-  inCheck(pos);
 
   // ./space bench
   if (argc == 2) {
