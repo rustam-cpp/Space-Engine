@@ -11,6 +11,8 @@ void Position::resetPiece(Square S, Piece P) {
   else
     BlackPieces &= ~(1ULL << S);
   pieces[P] &= ~(1ULL << S);
+
+  delFeature(acc, nnue, featureIndex(P, S));
 }
 
 void Position::setPiece(Square S, Piece P) {
@@ -27,6 +29,8 @@ void Position::setPiece(Square S, Piece P) {
   else
     BlackPieces |= (1ULL << S);
   pieces[P] |= (1ULL << S);
+
+  addFeature(acc, nnue, featureIndex(P, S));
 }
 
 Piece Position::getPiece(Square S) const {
@@ -127,6 +131,8 @@ void Position::convertFromFen(std::string FEN, rt* RT) {
 
   RT->clear();
   RT->add(ZobristHash);
+
+  initAccumulator(acc, nnue, *this);
 
 }
 

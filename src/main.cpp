@@ -1,10 +1,10 @@
 #include "board.h"
 #include "constants.h"
-#include "movegen.h"
 #include "tt.h"
 #include "uci.h"
 #include "evaluation.h"
 #include "search.h"
+#include "network.h"
 #include <iostream>
 #include <thread>
 
@@ -29,6 +29,9 @@ int main(int argc, char* argv[]) {
 
   // board
   Position* pos = new Position;
+
+  pos->nnue = &NNUE;
+
   pos->convertFromFen(StartFen, RT);
 
   // ./space bench

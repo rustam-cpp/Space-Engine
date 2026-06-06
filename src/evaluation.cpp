@@ -210,27 +210,34 @@ Eval evalBishopPair(const Position* pos) {
   return (Count(Bishops) >= 2 ? bishopPairBonus : 0);
 }
 
+// standart evaluation
+
+// Eval evaluation(const Position* pos) {
+//   Eval eval = 0;
+//   // material
+//   Eval material = evalNonPawnMaterial(pos);
+//   material += evalPieceType<PAWN>(pos);
+//   eval += material;
+//   // piece square tables
+//   eval += evalPieceSquareTable<PAWN>(pos, material);
+//   eval += evalPieceSquareTable<KNIGHT>(pos, material);
+//   eval += evalPieceSquareTable<BISHOP>(pos, material);
+//   eval += evalPieceSquareTable<ROOK>(pos, material);
+//   eval += evalPieceSquareTable<QUEEN>(pos, material);
+//   eval += evalPieceSquareTable<KING>(pos, material);
+//   // special evaluation for pawn structure
+//   eval += evalPawns<WHITE>(pos);
+//   eval -= evalPawns<BLACK>(pos);
+//   // bishop pair evaluation
+//   eval += evalBishopPair<WHITE>(pos);
+//   eval -= evalBishopPair<BLACK>(pos);
+//   // position good for white is bad for black
+//   int mul = (pos->WhiteToMove ? 1 : -1);
+//   // final evaluation
+//   return eval * mul;
+// }
+
 Eval evaluation(const Position* pos) {
-  Eval eval = 0;
-  // material
-  Eval material = evalNonPawnMaterial(pos);
-  material += evalPieceType<PAWN>(pos);
-  eval += material;
-  // piece square tables
-  eval += evalPieceSquareTable<PAWN>(pos, material);
-  eval += evalPieceSquareTable<KNIGHT>(pos, material);
-  eval += evalPieceSquareTable<BISHOP>(pos, material);
-  eval += evalPieceSquareTable<ROOK>(pos, material);
-  eval += evalPieceSquareTable<QUEEN>(pos, material);
-  eval += evalPieceSquareTable<KING>(pos, material);
-  // special evaluation for pawn structure
-  eval += evalPawns<WHITE>(pos);
-  eval -= evalPawns<BLACK>(pos);
-  // bishop pair evaluation
-  eval += evalBishopPair<WHITE>(pos);
-  eval -= evalBishopPair<BLACK>(pos);
-  // position good for white is bad for black
-  int mul = (pos->WhiteToMove ? 1 : -1);
-  // final evaluation
-  return eval * mul;
+  int mul = (pos->WhiteToMove ? 100 : -100);
+  return evaluate(pos->acc, pos->nnue) * mul;
 }
