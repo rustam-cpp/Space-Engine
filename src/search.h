@@ -8,7 +8,7 @@
 
 // debug function, that finds the count of all
 // leafs in search tree on a givved depth depth
-int64_t perft(Depth init, Depth depth, Position pos, rt* RT);
+int64_t perft(Depth init, Depth depth, Position* pos, rt* RT);
 
 // this function picks move from the [start, moves.size()) interval
 void pickMove(
@@ -24,7 +24,7 @@ void pickMove(
 // we run another search that will iterate over
 // all captures and pawn promotions
 Eval qsearch(
-  Position pos,
+  Position* pos,
   Eval alpha, Eval beta,
   int64_t& nodes,
   tt* TT, rt* RT,
@@ -35,7 +35,7 @@ Eval qsearch(
 // ~all moves, positions to calcualte the best move
 Eval search(
   Depth depth,
-  Position pos,
+  Position* pos,
   Eval alpha, Eval beta,
   int64_t& nodes,
   tt* TT, rt* RT,
@@ -46,7 +46,7 @@ Eval search(
 
 // finds the best move in the position
 Eval search_root(
-  Position pos,
+  Position* pos,
   Depth depth,
   Eval alpha, Eval beta,
   int64_t& nodes,
@@ -55,7 +55,7 @@ Eval search_root(
 
 // we will use iterative deepening
 std::pair<Move, int64_t> iterative_depening(
-  Position pos,
+  Position* pos,
   tt* TT, rt* RT,
   Depth maxDepth,
   long soft, long hard

@@ -187,11 +187,11 @@ Bitboard generateDirD(Bitboard Pieces, Bitboard OpPieces, Square S)  {
 
 // generates all pseudo legal moves from square S
 template <bool Q, bool W, bool AA>
-Bitboard generatePieceMoves(const Position& pos, Square S) {
-  Bitboard Pieces = (W ? pos.WhitePieces : pos.BlackPieces);
-  Bitboard OpPieces = (W ? pos.BlackPieces : pos.WhitePieces);
+Bitboard generatePieceMoves(const Position* pos, Square S) {
+  Bitboard Pieces = (W ? pos->WhitePieces : pos->BlackPieces);
+  Bitboard OpPieces = (W ? pos->BlackPieces : pos->WhitePieces);
   // a Piece on square S
-  Piece P = pos.getPiece(S);
+  Piece P = pos->getPiece(S);
   if (getType(P) == PAWN) {
     // pawn pseudo legal moves, O(1)
     Bitboard M = 0;
@@ -200,38 +200,38 @@ Bitboard generatePieceMoves(const Position& pos, Square S) {
     if (!Q && !AA) {
       // we want to generate not only captures
       // a simple pawn push
-      if (pos.getPiece(S + next) == NONE) {
+      if (pos->getPiece(S + next) == NONE) {
         M |= 1ULL << (S + next);
         // if the pawn is on the 2nd or 7th rank then we can do double push
-        if (getRank(S) == (W ? 1 : 6) && pos.getPiece(S + 2 * next) == NONE) {
+        if (getRank(S) == (W ? 1 : 6) && pos->getPiece(S + 2 * next) == NONE) {
           M |= 1ULL << (S + 2 * next);
         }
       }
     }
     if (getFile(S) > 0) {
       // target square
-      Piece p = pos.getPiece(S + next - 1);
+      Piece p = pos->getPiece(S + next - 1);
           // simple capture
       if (AA || (
           (p != NONE && getColor(p) != getColor(P)) ||
           // or en passant
-          (pos.EnPassantSquare == S + next - 1 &&
-          ((!W && getRank(pos.EnPassantSquare) == 2) ||
-           (W && getRank(pos.EnPassantSquare) == 5)))
+          (pos->EnPassantSquare == S + next - 1 &&
+          ((!W && getRank(pos->EnPassantSquare) == 2) ||
+           (W && getRank(pos->EnPassantSquare) == 5)))
           )) {
         M |= 1ULL << (S + next - 1);
       }
     }
     if (getFile(S) < 7) {
       // target square
-      Piece p = pos.getPiece(S + next + 1);
+      Piece p = pos->getPiece(S + next + 1);
           // simple capture
       if (AA || (
           (p != NONE && getColor(p) != getColor(P)) ||
           // or en passant
-          (pos.EnPassantSquare == S + next + 1 &&
-          ((!W && getRank(pos.EnPassantSquare) == 2) ||
-           (W && getRank(pos.EnPassantSquare) == 5)))
+          (pos->EnPassantSquare == S + next + 1 &&
+          ((!W && getRank(pos->EnPassantSquare) == 2) ||
+           (W && getRank(pos->EnPassantSquare) == 5)))
           )) {
         M |= 1ULL << (S + next + 1);
       }
@@ -239,7 +239,7 @@ Bitboard generatePieceMoves(const Position& pos, Square S) {
     // promotion
     if (getRank(S) == (W ? 6 : 1)) {
       // if the target square is not blocked
-      if (pos.getPiece(S + next) == NONE) {
+      if (pos->getPiece(S + next) == NONE) {
         M |= 1ULL << (S + next);
       }
     }
@@ -285,8 +285,8 @@ Bitboard generatePieceMoves(const Position& pos, Square S) {
 
 // generates all pseudo legal moves (moves that ignore checks)
 template <bool Q, bool W, bool AA>
-void generatePseudoLegalMoves(const Position& pos, std::vector<std::pair<Bitboard, Square>>& moves) {
-  Bitboard Pieces = (W ? pos.WhitePieces : pos.BlackPieces);
+void generatePseudoLegalMoves(const Position* pos, std::vector<std::pair<Bitboard, Square>>& moves) {
+  Bitboard Pieces = (W ? pos->WhitePieces : pos->BlackPieces);
   // we iterate over each piece
   for (Square S = FirstBit(Pieces); S < 64; S = NextBit(Pieces, S)) {
     Bitboard gpm = generatePieceMoves<Q, W, AA>(pos, S);
@@ -294,30 +294,30 @@ void generatePseudoLegalMoves(const Position& pos, std::vector<std::pair<Bitboar
   }
 }
 
-inline bool inCheckOp(const Position& pos) {
+inline bool inCheckOp(const Position* pos) {
   // get king square
-  Square King = FirstBit(pos.pieces[makePiece((pos.WhiteToMove ? BLACK : WHITE), KING)]);
+  Square King = FirstBit(pos->pieces[makePiece((pos->WhiteToMove ? BLACK : WHITE), KING)]);
       // knight attackability check
-  if ((knightMoves[King] & pos.pieces[makePiece((pos.WhiteToMove ? WHITE : BLACK), KNIGHT)]) == 0 &&
+  if ((knightMoves[King] & pos->pieces[makePiece((pos->WhiteToMove ? WHITE : BLACK), KNIGHT)]) == 0 &&
       // king attackability check
-      (kingMoves[King] & pos.pieces[makePiece((pos.WhiteToMove ? WHITE : BLACK), KING)]) == 0) {
+      (kingMoves[King] & pos->pieces[makePiece((pos->WhiteToMove ? WHITE : BLACK), KING)]) == 0) {
     // pawn attackability check
-    int next = (pos.WhiteToMove ? 8 : -8);
+    int next = (pos->WhiteToMove ? 8 : -8);
         // left
-    if ((getFile(King) == 0 || (pos.pieces[makePiece((pos.WhiteToMove ? WHITE : BLACK), PAWN)] & (1ULL << (King - next - 1))) == 0) &&
+    if ((getFile(King) == 0 || (pos->pieces[makePiece((pos->WhiteToMove ? WHITE : BLACK), PAWN)] & (1ULL << (King - next - 1))) == 0) &&
         // right
-        (getFile(King) == 7 || (pos.pieces[makePiece((pos.WhiteToMove ? WHITE : BLACK), PAWN)] & (1ULL << (King - next + 1))) == 0)) {
+        (getFile(King) == 7 || (pos->pieces[makePiece((pos->WhiteToMove ? WHITE : BLACK), PAWN)] & (1ULL << (King - next + 1))) == 0)) {
       // rook and queen attackability check
-      Bitboard MyPieces = (pos.WhiteToMove ? pos.BlackPieces : pos.WhitePieces);
-      Bitboard OpPieces = (pos.WhiteToMove ? pos.WhitePieces : pos.BlackPieces);
+      Bitboard MyPieces = (pos->WhiteToMove ? pos->BlackPieces : pos->WhitePieces);
+      Bitboard OpPieces = (pos->WhiteToMove ? pos->WhitePieces : pos->BlackPieces);
       Bitboard attacks = generateDirD<-8>(MyPieces, OpPieces, King) |
                          generateDirD<-1>(MyPieces, OpPieces, King) |
                          generateDirD<1>(MyPieces, OpPieces, King) |
                          generateDirD<8>(MyPieces, OpPieces, King);
           // rook attackability check
-      if (((pos.pieces[makePiece((pos.WhiteToMove ? WHITE : BLACK), ROOK)] |
+      if (((pos->pieces[makePiece((pos->WhiteToMove ? WHITE : BLACK), ROOK)] |
           // queen attackability check
-          pos.pieces[makePiece((pos.WhiteToMove ? WHITE : BLACK), QUEEN)]) &
+          pos->pieces[makePiece((pos->WhiteToMove ? WHITE : BLACK), QUEEN)]) &
           attacks) == 0) {
         // bishop and queen attackability check
         attacks = generateDirD<-9>(MyPieces, OpPieces, King) |
@@ -325,9 +325,9 @@ inline bool inCheckOp(const Position& pos) {
                   generateDirD<7>(MyPieces, OpPieces, King) |
                   generateDirD<9>(MyPieces, OpPieces, King);
             // bishop attackability check
-        if (((pos.pieces[makePiece((pos.WhiteToMove ? WHITE : BLACK), BISHOP)] |
+        if (((pos->pieces[makePiece((pos->WhiteToMove ? WHITE : BLACK), BISHOP)] |
             // queen attackability check
-            pos.pieces[makePiece((pos.WhiteToMove ? WHITE : BLACK), QUEEN)]) &
+            pos->pieces[makePiece((pos->WhiteToMove ? WHITE : BLACK), QUEEN)]) &
             attacks) == 0) {
           // attackability tests passed, so there is no check on the board
           return false;
@@ -338,29 +338,29 @@ inline bool inCheckOp(const Position& pos) {
   return true;
 }
 
-inline bool inCheck(const Position& pos) {
+inline bool inCheck(const Position* pos) {
   // get king square
-  Square King = FirstBit(pos.pieces[makePiece((pos.WhiteToMove ? WHITE : BLACK), KING)]);
-  if ((knightMoves[King] & pos.pieces[makePiece((pos.WhiteToMove ? BLACK : WHITE), KNIGHT)]) == 0 &&
-      (kingMoves[King] & pos.pieces[makePiece((pos.WhiteToMove ? BLACK : WHITE), KING)]) == 0) {
-    int next = (pos.WhiteToMove ? 8 : -8);
-    if ((getFile(King) == 0 || (pos.pieces[makePiece((pos.WhiteToMove ? BLACK : WHITE), PAWN)] & (1ULL << (King - next - 1))) == 0) &&
-        (getFile(King) == 7 || (pos.pieces[makePiece((pos.WhiteToMove ? BLACK : WHITE), PAWN)] & (1ULL << (King - next + 1))) == 0)) {
-      Bitboard MyPieces = (pos.WhiteToMove ? pos.WhitePieces : pos.BlackPieces);
-      Bitboard OpPieces = (pos.WhiteToMove ? pos.BlackPieces : pos.WhitePieces);
+  Square King = FirstBit(pos->pieces[makePiece((pos->WhiteToMove ? WHITE : BLACK), KING)]);
+  if ((knightMoves[King] & pos->pieces[makePiece((pos->WhiteToMove ? BLACK : WHITE), KNIGHT)]) == 0 &&
+      (kingMoves[King] & pos->pieces[makePiece((pos->WhiteToMove ? BLACK : WHITE), KING)]) == 0) {
+    int next = (pos->WhiteToMove ? -8 : 8);
+    if ((getFile(King) == 0 || (pos->pieces[makePiece((pos->WhiteToMove ? BLACK : WHITE), PAWN)] & (1ULL << (King - next - 1))) == 0) &&
+        (getFile(King) == 7 || (pos->pieces[makePiece((pos->WhiteToMove ? BLACK : WHITE), PAWN)] & (1ULL << (King - next + 1))) == 0)) {
+      Bitboard MyPieces = (pos->WhiteToMove ? pos->WhitePieces : pos->BlackPieces);
+      Bitboard OpPieces = (pos->WhiteToMove ? pos->BlackPieces : pos->WhitePieces);
       Bitboard attacks = generateDirD<-8>(MyPieces, OpPieces, King) |
                          generateDirD<-1>(MyPieces, OpPieces, King) |
                          generateDirD<1>(MyPieces, OpPieces, King) |
                          generateDirD<8>(MyPieces, OpPieces, King);
-      if (((pos.pieces[makePiece((pos.WhiteToMove ? BLACK : WHITE), ROOK)] |
-          pos.pieces[makePiece((pos.WhiteToMove ? BLACK : WHITE), QUEEN)]) &
+      if (((pos->pieces[makePiece((pos->WhiteToMove ? BLACK : WHITE), ROOK)] |
+            pos->pieces[makePiece((pos->WhiteToMove ? BLACK : WHITE), QUEEN)]) &
           attacks) == 0) {
         attacks = generateDirD<-9>(MyPieces, OpPieces, King) |
                   generateDirD<-7>(MyPieces, OpPieces, King) |
                   generateDirD<7>(MyPieces, OpPieces, King) |
                   generateDirD<9>(MyPieces, OpPieces, King);
-        if (((pos.pieces[makePiece((pos.WhiteToMove ? BLACK : WHITE), BISHOP)] |
-            pos.pieces[makePiece((pos.WhiteToMove ? BLACK : WHITE), QUEEN)]) &
+        if (((pos->pieces[makePiece((pos->WhiteToMove ? BLACK : WHITE), BISHOP)] |
+              pos->pieces[makePiece((pos->WhiteToMove ? BLACK : WHITE), QUEEN)]) &
             attacks) == 0) {
           return false;
         }
@@ -372,11 +372,11 @@ inline bool inCheck(const Position& pos) {
 
 // generates all legal moves
 template <bool Q, bool OOM>
-void generateMoves(Position& pos, std::vector<Move>& moves, rt* RT) {
+void generateMoves(Position* pos, std::vector<Move>& moves, rt* RT) {
 
   moves.reserve((OOM ? 1 : 40));
   std::vector<std::pair<Bitboard, Square>> myMoves, opMoves;
-  if (pos.WhiteToMove) {
+  if (pos->WhiteToMove) {
     generatePseudoLegalMoves<Q, true, false>(pos, myMoves);
   } else {
     generatePseudoLegalMoves<Q, false, false>(pos, myMoves);
@@ -394,21 +394,21 @@ void generateMoves(Position& pos, std::vector<Move>& moves, rt* RT) {
         // 1.2. but it can be a promotion
         if (getType(move.Moved) == PAWN && (getRank(move.To) == 0 || getRank(move.To) == 7)) {
           // we can promote to any piece
-          move.PromotedTo = makePiece((pos.WhiteToMove ? BLACK : WHITE), KNIGHT);
+          move.PromotedTo = makePiece((pos->WhiteToMove ? BLACK : WHITE), KNIGHT);
           moves.push_back(move);
           // if we need to generate only 1 move
           if (OOM) {
             undoMove(pos, move, RT);
             return;
           }
-          move.PromotedTo = makePiece((pos.WhiteToMove ? BLACK : WHITE), BISHOP);
+          move.PromotedTo = makePiece((pos->WhiteToMove ? BLACK : WHITE), BISHOP);
           moves.push_back(move);
-          move.PromotedTo = makePiece((pos.WhiteToMove ? BLACK : WHITE), ROOK);
+          move.PromotedTo = makePiece((pos->WhiteToMove ? BLACK : WHITE), ROOK);
           moves.push_back(move);
-          move.PromotedTo = makePiece((pos.WhiteToMove ? BLACK : WHITE), QUEEN);
+          move.PromotedTo = makePiece((pos->WhiteToMove ? BLACK : WHITE), QUEEN);
           moves.push_back(move);
           // reset
-          move.PromotedTo = makePiece((pos.WhiteToMove ? BLACK : WHITE), PAWN);
+          move.PromotedTo = makePiece((pos->WhiteToMove ? BLACK : WHITE), PAWN);
         } else {
           moves.push_back(move);
           // if we need to generate only 1 move
@@ -422,7 +422,7 @@ void generateMoves(Position& pos, std::vector<Move>& moves, rt* RT) {
     }
   }
 
-  if (pos.WhiteToMove) {
+  if (pos->WhiteToMove) {
     generatePseudoLegalMoves<false, false, true>(pos, opMoves);
   } else {
     generatePseudoLegalMoves<false, true, true>(pos, opMoves);
@@ -435,35 +435,35 @@ void generateMoves(Position& pos, std::vector<Move>& moves, rt* RT) {
   
   // 2. castlings
   if (!Q) {
-    if (pos.WhiteToMove && (pos.pieces[makePiece(WHITE, KING)] & attacked) == 0) {
-      if (getCastlingAvailability(pos.Castlings, 'K')) {
+    if (pos->WhiteToMove && (pos->pieces[makePiece(WHITE, KING)] & attacked) == 0) {
+      if (getCastlingAvailability(pos->Castlings, 'K')) {
         // square 5 is f1, square 6 is g1
-        if (pos.getPiece(5) == NONE && pos.getPiece(6) == NONE &&
+        if (pos->getPiece(5) == NONE && pos->getPiece(6) == NONE &&
             (attacked & (1ULL << 5)) == 0 && (attacked & (1ULL << 6)) == 0) {
           moves.push_back(makeMove(pos, 4, 6, NONE));
           if (OOM) return;
         }
       }
-      if (getCastlingAvailability(pos.Castlings, 'Q')) {
+      if (getCastlingAvailability(pos->Castlings, 'Q')) {
         // square 1 is b1, 2 is c1, 3 is d1
-        if (pos.getPiece(1) == NONE && pos.getPiece(2) == NONE && pos.getPiece(3) == NONE &&
+        if (pos->getPiece(1) == NONE && pos->getPiece(2) == NONE && pos->getPiece(3) == NONE &&
             (attacked & (1ULL << 2)) == 0 && (attacked & (1ULL << 3)) == 0) {
           moves.push_back(makeMove(pos, 4, 2, NONE));
           if (OOM) return;
         }
       }
-    } else if ((pos.pieces[makePiece(BLACK, KING)] & attacked) == 0) {
-      if (getCastlingAvailability(pos.Castlings, 'k')) {
+    } else if ((pos->pieces[makePiece(BLACK, KING)] & attacked) == 0) {
+      if (getCastlingAvailability(pos->Castlings, 'k')) {
         // square 61 is f8, 62 is g8
-        if (pos.getPiece(61) == NONE && pos.getPiece(62) == NONE &&
+        if (pos->getPiece(61) == NONE && pos->getPiece(62) == NONE &&
             (attacked & (1ULL << 61)) == 0 && (attacked & (1ULL << 62)) == 0) {
           moves.push_back(makeMove(pos, 60, 62, NONE));
           if (OOM) return;
         }
       }
-      if (getCastlingAvailability(pos.Castlings, 'q')) {
+      if (getCastlingAvailability(pos->Castlings, 'q')) {
         // square 57 is b8, 58 is c8, 59 is d8
-        if (pos.getPiece(57) == NONE && pos.getPiece(58) == NONE && pos.getPiece(59) == NONE &&
+        if (pos->getPiece(57) == NONE && pos->getPiece(58) == NONE && pos->getPiece(59) == NONE &&
             (attacked & (1ULL << 58)) == 0 && (attacked & (1ULL << 59)) == 0) {
           moves.push_back(makeMove(pos, 60, 58, NONE));
           if (OOM) return;

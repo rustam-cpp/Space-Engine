@@ -20,11 +20,11 @@ std::vector<std::string> split(std::string command) {
   return result;
 }
 
-void processPositionCommand(Position& pos, rt* RT, std::string command) {
+void processPositionCommand(Position* pos, rt* RT, std::string command) {
   std::vector<std::string> cmd = split(command);
   int i;
   if (cmd[1] == "startpos") {
-    pos.convertFromFen(StartFen, RT);
+    pos->convertFromFen(StartFen, RT);
     i = 2;
   } else {
     std::string fen = cmd[2] + " "
@@ -33,7 +33,7 @@ void processPositionCommand(Position& pos, rt* RT, std::string command) {
                     + cmd[5] + " "
                     + cmd[6] + " "
                     + cmd[7];
-    pos.convertFromFen(fen, RT);
+    pos->convertFromFen(fen, RT);
     i = 8;
   }
   if (i < (int)cmd.size() && cmd[i] == "moves") {
@@ -47,14 +47,14 @@ void processPositionCommand(Position& pos, rt* RT, std::string command) {
         PromotedTo = convertStringToPiece(cmd[i][4]);
         // we need this if because all promoted pieces in uci are black.
         // for example e7e8q, but e7 is a white pawn
-        if (pos.WhiteToMove) PromotedTo = swapColor(PromotedTo);
+        if (pos->WhiteToMove) PromotedTo = swapColor(PromotedTo);
       }
       doMove(pos, makeMove(pos, From, To, PromotedTo), RT);
     }
   }
 }
 
-void processGoCommand(Position& pos, tt* TT, rt* RT, std::string command) {
+void processGoCommand(Position* pos, tt* TT, rt* RT, std::string command) {
   Depth maxDepth = MAX_PLY;
   // base time, increment
   long myTime = BIG_INF, myInc = 0;
@@ -62,18 +62,18 @@ void processGoCommand(Position& pos, tt* TT, rt* RT, std::string command) {
   std::vector<std::string> cmd = split(command);
   for (int i = 0; i < (int)cmd.size(); i++) {
     // base time
-    if (cmd[i] == "wtime" && pos.WhiteToMove) {
+    if (cmd[i] == "wtime" && pos->WhiteToMove) {
       if ((int)cmd.size() >= i)
         myTime = stol(cmd[i+1]);
-    } else if (cmd[i] == "btime" && !pos.WhiteToMove) {
+    } else if (cmd[i] == "btime" && !pos->WhiteToMove) {
       if ((int)cmd.size() >= i)
         myTime = stol(cmd[i+1]);
     }
     // increment
-    if (cmd[i] == "winc" && pos.WhiteToMove) {
+    if (cmd[i] == "winc" && pos->WhiteToMove) {
       if ((int)cmd.size() >= i)
         myInc = stol(cmd[i+1]);
-    } else if (cmd[i] == "binc" && !pos.WhiteToMove) {
+    } else if (cmd[i] == "binc" && !pos->WhiteToMove) {
       if ((int)cmd.size() >= i)
         myInc = stol(cmd[i+1]);
     }
@@ -104,8 +104,7 @@ void processGoCommand(Position& pos, tt* TT, rt* RT, std::string command) {
   std::cout << "bestmove " << convertMoveToString(bestmove) << std::endl;
 }
 
-void processBenchCommand() {
-  Position Pos;
+void processBenchCommand(Position* pos) {
   tt* tempTT = new tt(8);
   rt* tempRT = new rt;
   int64_t nodes = 0;
@@ -113,8 +112,8 @@ void processBenchCommand() {
   for (const auto& [fen, depth] : benchPositions) {
     tempTT->clear();
     tempRT->clear();
-    Pos.convertFromFen(fen, tempRT);
-    nodes += iterative_depening(Pos, tempTT, tempRT, depth, BIG_INF, BIG_INF).second;
+    pos->convertFromFen(fen, tempRT);
+    nodes += iterative_depening(pos, tempTT, tempRT, depth, BIG_INF, BIG_INF).second;
   }
   long end = std::chrono::high_resolution_clock::now().time_since_epoch().count();
   long Time = (end - start) / 1'000'000;
@@ -124,13 +123,13 @@ void processBenchCommand() {
 }
 
 void processPerftTestCommand() {
-  Position Pos;
+  Position* Pos = new Position;
   rt* tempRT = new rt;
   int passed = 0;
   int failed = 0;
   int tn = 0;
   for (auto [fen, d, ans] : perftPositions) {
-    Pos.convertFromFen(fen, tempRT);
+    Pos->convertFromFen(fen, tempRT);
     int64_t res = perft(d, d, Pos, tempRT);
     if (res == ans) {
       passed++;

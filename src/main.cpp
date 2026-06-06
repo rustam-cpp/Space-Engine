@@ -1,5 +1,6 @@
 #include "board.h"
 #include "constants.h"
+#include "movegen.h"
 #include "tt.h"
 #include "uci.h"
 #include "evaluation.h"
@@ -26,18 +27,19 @@ int main(int argc, char* argv[]) {
 
   rt* RT = new rt;
 
+  // board
+  Position* pos = new Position;
+  pos->convertFromFen(StartFen, RT);
+  inCheck(pos);
+
   // ./space bench
   if (argc == 2) {
     std::string cmd = argv[1];
-    processBenchCommand();
+    processBenchCommand(pos);
     return 0;
   }
 
   info();
-
-  // board
-  Position pos;
-  pos.convertFromFen(StartFen, RT);
 
   // transposition table
   tt* TT = new tt(256);
@@ -71,7 +73,7 @@ int main(int argc, char* argv[]) {
     } else if (command == "stop") {
       stopCommand();
     } else if (command == "bench") {
-      processBenchCommand();
+      processBenchCommand(pos);
     } else if (command == "perfttest") {
       processPerftTestCommand();
     } else if (command.substr(0, 25) == "setoption name Hash value") {

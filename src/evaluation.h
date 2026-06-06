@@ -161,22 +161,22 @@ constexpr Eval Weight[13][64] = {
 };
 
 template <PieceType T>
-Eval evalPieceType(const Position& pos);
+Eval evalPieceType(const Position* pos);
 
-Eval evalNonPawnMaterial(const Position& pos);
+Eval evalNonPawnMaterial(const Position* pos);
 
-Eval evalKingsInEngame(const Position& pos, Eval Material);
+Eval evalKingsInEngame(const Position* pos, Eval Material);
 
 template <PieceType T>
-Eval evalPieceSquareTable(const Position& pos,Eval Material);
+Eval evalPieceSquareTable(const Position* pos,Eval Material);
 
 template <Color C>
-Eval evalPawns(const Position& pos);
+Eval evalPawns(const Position* pos);
 
 template <Color C>
-Eval evalKingSafety(const Position& pos);
+Eval evalKingSafety(const Position* pos);
 
 template <Color C>
-Eval evalBishopPair(const Position& pos);
+Eval evalBishopPair(const Position* pos);
 
-Eval evaluation(const Position& pos);
+Eval evaluation(const Position* pos);

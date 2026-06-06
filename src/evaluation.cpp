@@ -4,14 +4,14 @@
 #include "types.h"
 
 template <PieceType T>
-Eval evalPieceType(const Position& pos) {
+Eval evalPieceType(const Position* pos) {
   Eval eval = 0;
-  eval += Count(pos.pieces[makePiece(WHITE, T)]);
-  eval -= Count(pos.pieces[makePiece(BLACK, T)]);
+  eval += Count(pos->pieces[makePiece(WHITE, T)]);
+  eval -= Count(pos->pieces[makePiece(BLACK, T)]);
   return eval * simp[T];
 }
 
-Eval evalNonPawnMaterial(const Position& pos) {
+Eval evalNonPawnMaterial(const Position* pos) {
   Eval eval = 0;
   eval += evalPieceType<KNIGHT>(pos);
   eval += evalPieceType<BISHOP>(pos);
@@ -20,9 +20,9 @@ Eval evalNonPawnMaterial(const Position& pos) {
   return eval;
 }
 
-Eval evalKingsInEngame(const Position& pos, Eval Material) {
-  Square WhiteK = FirstBit(pos.pieces[makePiece(WHITE, KING)]);
-  Square BlackK = FirstBit(pos.pieces[makePiece(BLACK, KING)]);
+Eval evalKingsInEngame(const Position* pos, Eval Material) {
+  Square WhiteK = FirstBit(pos->pieces[makePiece(WHITE, KING)]);
+  Square BlackK = FirstBit(pos->pieces[makePiece(BLACK, KING)]);
   int distW = std::max(3 - (int)getFile(WhiteK), (int)getFile(WhiteK) - 4) +
               std::max(3 - (int)getRank(WhiteK), (int)getRank(WhiteK) - 4);
   int distB = std::max(3 - (int)getFile(BlackK), (int)getFile(BlackK) - 4) +
@@ -33,13 +33,13 @@ Eval evalKingsInEngame(const Position& pos, Eval Material) {
 }
 
 template <Color C>
-Eval evalKingSafety(const Position& pos) {
+Eval evalKingSafety(const Position* pos) {
 
   // evaluation
   Eval eval = 0;
 
   // king square
-  Square S = FirstBit(pos.pieces[makePiece(C, KING)]);
+  Square S = FirstBit(pos->pieces[makePiece(C, KING)]);
 
   // 1. PAWN SHIELD
   if ((C == WHITE && getRank(S) <= 1) || (C == BLACK && getRank(S) >= 6))  {
@@ -52,7 +52,7 @@ Eval evalKingSafety(const Position& pos) {
       Bitboard file = FileA << f;
 
       // pawns on file f (variable)
-      Bitboard pawns = file & pos.pieces[makePiece(C, PAWN)];
+      Bitboard pawns = file & pos->pieces[makePiece(C, PAWN)];
 
       // open file
       if (pawns == 0) {
@@ -82,15 +82,15 @@ Eval evalKingSafety(const Position& pos) {
   }
 
   // enemy pawns
-  Bitboard pawnE = pos.pieces[swapColor(makePiece(C, PAWN))];
+  Bitboard pawnE = pos->pieces[swapColor(makePiece(C, PAWN))];
   // enemy pieces (non pawn)
-  Bitboard pieceE = (C == BLACK ? pos.WhitePieces : pos.BlackPieces) ^ pawnE;
+  Bitboard pieceE = (C == BLACK ? pos->WhitePieces : pos->BlackPieces) ^ pawnE;
 
   // 3. DISTANCE TO ENEMY PIECES
   for (Square s = FirstBit(pieceE); s < 64; s = NextBit(pieceE, s)) {
 
     int dist = abs(getRank(S) - getRank(s)) + abs(getFile(S) - getFile(s));
-    eval -= simp[getType(pos.getPiece(s))] / dist;
+    eval -= simp[getType(pos->getPiece(s))] / dist;
 
   }
 
@@ -99,7 +99,7 @@ Eval evalKingSafety(const Position& pos) {
 }
 
 template <PieceType T>
-Eval evalPieceSquareTable(const Position& pos, Eval Material) {
+Eval evalPieceSquareTable(const Position* pos, Eval Material) {
 
   Eval eval = 0;
   Eval eval2 = 0;
@@ -112,9 +112,9 @@ Eval evalPieceSquareTable(const Position& pos, Eval Material) {
 
   int count = 0;
   // -1 because of white king
-  count += Count(pos.WhitePieces ^ pos.pieces[makePiece(WHITE, PAWN)]) - 1;
+  count += Count(pos->WhitePieces ^ pos->pieces[makePiece(WHITE, PAWN)]) - 1;
   // -1 because of black king
-  count += Count(pos.BlackPieces ^ pos.pieces[makePiece(BLACK, PAWN)]) - 1;
+  count += Count(pos->BlackPieces ^ pos->pieces[makePiece(BLACK, PAWN)]) - 1;
   // we will use this formula for "softer" evaluation
 
   Piece wP = makePiece(WHITE, T);
@@ -122,16 +122,16 @@ Eval evalPieceSquareTable(const Position& pos, Eval Material) {
   
   // in these 2 fors we are watching at each piece type
   // entry on the board with fast bit-operation functions
-  for (Square i = FirstBit(pos.pieces[wP]); i < 64;
-              i = NextBit(pos.pieces[wP], i)) {
+  for (Square i = FirstBit(pos->pieces[wP]); i < 64;
+              i = NextBit(pos->pieces[wP], i)) {
     if (T == KING || T == PAWN) {
       eval += (Weight[T][i] * count + Weight[T + 6][i] * (14 - count)) / 14;
     } else {
       eval += Weight[T][i];
     }
   }
-  for (Square i = FirstBit(pos.pieces[bP]); i < 64;
-              i = NextBit(pos.pieces[bP], i)) {
+  for (Square i = FirstBit(pos->pieces[bP]); i < 64;
+              i = NextBit(pos->pieces[bP], i)) {
     if (T == KING || T == PAWN) {
       eval -= (Weight[T][swapRank(i)] * count + Weight[T + 6][swapRank(i)] * (14 - count)) / 14;
     } else {
@@ -149,13 +149,13 @@ Eval evalPieceSquareTable(const Position& pos, Eval Material) {
 }
 
 template <Color C>
-Eval evalPawns(const Position& pos) {
+Eval evalPawns(const Position* pos) {
   Eval eval = 0;
   Piece P = makePiece(C, PAWN);
   // opposite color Pawn
   Piece oP = swapColor(P);
-  for (Square i = FirstBit(pos.pieces[P]); i < 64;
-              i = NextBit(pos.pieces[P], i)) {
+  for (Square i = FirstBit(pos->pieces[P]); i < 64;
+              i = NextBit(pos->pieces[P], i)) {
     // Mask is a mix of rank on the left (if exists),
     // rank on the right (if exists) and middle rank.
     Bitboard Mask = 0;
@@ -183,19 +183,19 @@ Eval evalPawns(const Position& pos) {
       std::swap(PrevM, NextM);
     }
     int cur = 0;
-    if ((pos.pieces[oP] & Next) == 0ULL) {
+    if ((pos->pieces[oP] & Next) == 0ULL) {
       // passed pawn
       cur += Weight[7][(C == WHITE ? i : swapRank(i))];
-      if ((pos.pieces[P] & (Prev ^ PrevM)) != 0ULL) {
+      if ((pos->pieces[P] & (Prev ^ PrevM)) != 0ULL) {
         // protected
         cur += protectedPassedPawnBonus;
       }
     }
-    if ((pos.pieces[P] & (Prev ^ PrevM)) == 0ULL) {
+    if ((pos->pieces[P] & (Prev ^ PrevM)) == 0ULL) {
       // isolated pawn
       cur -= isolatedPawnPenalty;
     }
-    if ((pos.pieces[P] & NextM) != 0ULL) {
+    if ((pos->pieces[P] & NextM) != 0ULL) {
       // doubled
       cur -= doubledPawnPenalty;
     }
@@ -205,12 +205,12 @@ Eval evalPawns(const Position& pos) {
 }
 
 template <Color C>
-Eval evalBishopPair(const Position& pos) {
-  Bitboard Bishops = pos.pieces[makePiece(C, BISHOP)];
+Eval evalBishopPair(const Position* pos) {
+  Bitboard Bishops = pos->pieces[makePiece(C, BISHOP)];
   return (Count(Bishops) >= 2 ? bishopPairBonus : 0);
 }
 
-Eval evaluation(const Position& pos) {
+Eval evaluation(const Position* pos) {
   Eval eval = 0;
   // material
   Eval material = evalNonPawnMaterial(pos);
@@ -230,7 +230,7 @@ Eval evaluation(const Position& pos) {
   eval += evalBishopPair<WHITE>(pos);
   eval -= evalBishopPair<BLACK>(pos);
   // position good for white is bad for black
-  int mul = (pos.WhiteToMove ? 1 : -1);
+  int mul = (pos->WhiteToMove ? 1 : -1);
   // final evaluation
   return eval * mul;
 }

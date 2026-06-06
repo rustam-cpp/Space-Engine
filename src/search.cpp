@@ -17,7 +17,7 @@ long timeToThink;
 Move killer[MAX_PLY][2];
 int history[2][64][64];
 
-int64_t perft(Depth init, Depth depth, Position pos, rt* RT) {
+int64_t perft(Depth init, Depth depth, Position* pos, rt* RT) {
   // leaf
   if (depth == 0) return 1;
   // all legal moves
@@ -93,7 +93,7 @@ void pickMove(
 Depth seldepth;
 
 Eval qsearch(
-  Position pos,
+  Position* pos,
   Eval alpha, Eval beta,
   int64_t& nodes,
   tt* TT, rt* RT,
@@ -116,7 +116,7 @@ Eval qsearch(
   seldepth = std::max(seldepth, ply);
 
   // if there is a draw on the board, then you need to return 0
-  if (pos.isRepetitionDraw(RT) || pos.isFiftyMoveDraw())
+  if (pos->isRepetitionDraw(RT) || pos->isFiftyMoveDraw())
     return 0;
 
   // static evaluation of position
@@ -130,7 +130,7 @@ Eval qsearch(
 
   alpha = std::max(alpha, eval);
 
-  TTentry* entry = TT->probe(pos.ZobristHash);
+  TTentry* entry = TT->probe(pos->ZobristHash);
   if (entry != nullptr) {
     Eval e = entry->eval;
 
@@ -174,7 +174,7 @@ Eval qsearch(
 
     if (!is_running) break;
 
-    pickMove(pos.WhiteToMove, moves, i, Move(), -1);
+    pickMove(pos->WhiteToMove, moves, i, Move(), -1);
 
     doMove(pos, moves[i], RT);
 
@@ -218,7 +218,7 @@ Eval qsearch(
   if (sE < -Mate + 1000)
     sE -= ply;
 
-  TT->store(pos.ZobristHash, 0, sE, flag, bestMove);
+  TT->store(pos->ZobristHash, 0, sE, flag, bestMove);
 
   return alpha;
 
@@ -226,7 +226,7 @@ Eval qsearch(
 
 Eval search(
   Depth depth,
-  Position pos,
+  Position* pos,
   Eval alpha, Eval beta,
   int64_t& nodes,
   tt* TT, rt* RT,
@@ -251,11 +251,11 @@ Eval search(
   }
 
   // if there is a draw on the board, then you need to return 0
-  if (pos.isRepetitionDraw(RT) || pos.isFiftyMoveDraw())
+  if (pos->isRepetitionDraw(RT) || pos->isFiftyMoveDraw())
     return 0;
 
   // if we can use TT
-  TTentry* entry = TT->probe(pos.ZobristHash);
+  TTentry* entry = TT->probe(pos->ZobristHash);
 
   // best move from TT
   Move ttMove = Move();
@@ -330,7 +330,7 @@ Eval search(
       evalNonPawnMaterial(pos) != 0) {
 
     // en passant square
-    Square eps = pos.EnPassantSquare;
+    Square eps = pos->EnPassantSquare;
 
     Depth r = 2 + depth / 6;
 
@@ -349,7 +349,7 @@ Eval search(
 
     undoNullMove(pos, RT);
 
-    pos.EnPassantSquare = eps;
+    pos->EnPassantSquare = eps;
 
     if (eval >= beta) {
       Best = eval;
@@ -364,7 +364,7 @@ Eval search(
 
     localPV.clear();
 
-    pickMove(pos.WhiteToMove, moves, i, ttMove, ply);
+    pickMove(pos->WhiteToMove, moves, i, ttMove, ply);
 
     const Move move = moves[i];
 
@@ -475,7 +475,7 @@ Eval search(
           getType(move.PromotedTo) == NONE &&
           getType(move.Captured) == NONE) {
         // update history
-        history[pos.WhiteToMove][move.From][move.To] += depth * depth;
+        history[pos->WhiteToMove][move.From][move.To] += depth * depth;
         // update killers
         if (!(killer[ply][0] == move)) {
           killer[ply][1] = killer[ply][0];
@@ -506,7 +506,7 @@ Eval search(
   if (sE < -Mate + 1000)
     sE -= ply;
 
-  TT->store(pos.ZobristHash, depth, sE, flag, bestMove);
+  TT->store(pos->ZobristHash, depth, sE, flag, bestMove);
 
   return Best;
 
@@ -515,7 +515,7 @@ Eval search(
 std::deque<Move> PV;
 
 Eval search_root(
-  Position pos,
+  Position* pos,
   Depth depth,
   Eval alpha, Eval beta,
   int64_t& nodes,
@@ -544,7 +544,7 @@ Eval search_root(
 }
 
 std::pair<Move, int64_t> iterative_depening(
-  Position pos,
+  Position* pos,
   tt* TT, rt* RT,
   Depth maxDepth,
   long soft, long hard
