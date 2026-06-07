@@ -65,7 +65,7 @@ def train():
   data = load_data("dataset/dataset.txt")
 
   batch_size = 256
-  epochs = 20
+  epochs = 50
 
   for epoch in range(epochs):
 
