@@ -1,5 +1,5 @@
 EXE = space
-EVALFILE = src/first.nnue
+EVALFILE = src/second.nnue
 
 COMPILER = g++
 VERSION = -std=c++23
