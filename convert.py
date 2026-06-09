@@ -1,7 +1,7 @@
 import sys
 import struct
 
-INPUT = 768
+INPUT = 773
 HIDDEN = 128
 
 path = sys.argv[1]

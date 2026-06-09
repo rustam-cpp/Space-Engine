@@ -1,0 +1,6 @@
+generate_fen.py
+generate_dataset.py
+main.py
+exporter.py
+
+All these files are mostly written by ChatGPT and Claude :)

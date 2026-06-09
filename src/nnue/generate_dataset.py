@@ -4,44 +4,59 @@ import multiprocessing as mp
 from tqdm import tqdm
 
 STOCKFISH_PATH = "stockfish"
+
 INPUT = "dataset/fen.txt"
 OUTPUT = "dataset/dataset.txt"
 
-TIME_LIMIT = 0.03
-THREADS_PER_ENGINE = 1
-BATCH_SIZE = 500
+BATCH_SIZE = 800
+WORKERS = 8
+
+NODES_LIMIT = 800
+
+engine = None
 
 
-def chunk_list(lst, chunk_size):
-  for i in range(0, len(lst), chunk_size):
-    yield lst[i:i + chunk_size]
+def init_engine():
+  global engine
+  engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH)
+
+  engine.configure({
+    "Threads": 1,
+    "Hash": 64
+  })
 
 
 def eval_batch(fens):
-  engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH)
-  engine.configure({"Threads": THREADS_PER_ENGINE})
-
   results = []
+
+  local_engine = engine
 
   for fen in fens:
     try:
       board = chess.Board(fen)
 
-      info = engine.analyse(
+      info = local_engine.analyse(
         board,
-        chess.engine.Limit(time=TIME_LIMIT)
+        chess.engine.Limit(nodes=NODES_LIMIT)
       )
 
-      score = info["score"].white().score(mate_score=30000)
-      score = score if score is not None else 0
+      score_obj = info["score"].relative
+      score = score_obj.score(mate_score=30000)
+
+      if score is None:
+        score = 0
 
       results.append(f"{fen}|{score}")
 
     except Exception:
       continue
 
-  engine.quit()
   return results
+
+
+def chunk_list(lst, chunk_size):
+  for i in range(0, len(lst), chunk_size):
+    yield lst[i:i + chunk_size]
 
 
 def main():
@@ -50,29 +65,29 @@ def main():
 
   batches = list(chunk_list(fens, BATCH_SIZE))
 
-  workers = 8
-
   print(f"FENs: {len(fens)}")
   print(f"Batches: {len(batches)}")
-  print(f"Workers: {workers}")
+  print(f"Workers: {WORKERS}")
+  print(f"Batch size: {BATCH_SIZE}")
 
-  with mp.Pool(workers) as pool:
+  with mp.Pool(
+    processes=WORKERS,
+    initializer=init_engine,
+    maxtasksperchild=200
+  ) as pool:
 
-    all_results = list(
-      tqdm(
-        pool.imap(eval_batch, batches),
+    with open(OUTPUT, "w") as out:
+      for batch_result in tqdm(
+        pool.imap_unordered(eval_batch, batches, chunksize=1),
         total=len(batches),
         desc="Stockfish labeling"
-      )
-    )
-
-  with open(OUTPUT, "w") as out:
-    for batch in all_results:
-      for line in batch:
-        out.write(line + "\n")
+      ):
+        for line in batch_result:
+          out.write(line + "\n")
 
   print("Done!")
 
 
 if __name__ == "__main__":
+  mp.set_start_method("fork", force=True)
   main()

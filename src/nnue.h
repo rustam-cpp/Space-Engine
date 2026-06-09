@@ -16,7 +16,7 @@ inline int featureIndex(Piece P, Square S) {
   return ((gc(P) - 1) * 6 + (gt(P) - 1)) * 64 + S;
 }
 
-constexpr int INPUT = 768;
+constexpr int INPUT = 773;
 constexpr int HIDDEN = 128;
 
 struct Network {
