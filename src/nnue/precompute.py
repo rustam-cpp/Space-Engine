@@ -13,7 +13,13 @@ def fen_to_tensor(fen):
   pieces = board.piece_map()
 
   for sq, piece in pieces.items():
-    idx = (piece.piece_type - 1 + (6 if piece.color else 0)) * 64 + sq
+
+    color_offset = 0
+    if piece.color == chess.WHITE:
+      color_offset = 6
+
+    idx = (piece.piece_type - 1 + color_offset) * 64 + sq
+
     x[idx] = 1
 
   x[768] = float(board.turn)

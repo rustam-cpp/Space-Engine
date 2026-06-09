@@ -44,7 +44,7 @@ def train():
   X_train, Y_train = X[:split], Y[:split]
   X_val, Y_val = X[split:], Y[split:]
 
-  batch_size = 256
+  batch_size = 16384
   epochs = 50
 
   for epoch in range(epochs):
