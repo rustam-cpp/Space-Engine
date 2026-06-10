@@ -79,7 +79,6 @@ void Position::convertFromFen(std::string FEN, rt* RT) {
   
   // 2. Side to move
   if (FEN[i] == 'w') {
-    addFeature(acc, nnue, INPUT - 5);
     WhiteToMove = true;
   } else
     WhiteToMove = false;

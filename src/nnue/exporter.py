@@ -1,7 +1,7 @@
 import torch
 import struct
 
-INPUT = 773
+INPUT = 772
 HIDDEN = 128
 
 class NNUE(torch.nn.Module):

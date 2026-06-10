@@ -3,7 +3,7 @@ import chess
 from tqdm import tqdm
 import time
 
-INPUT = 773
+INPUT = 772
 
 
 def fen_to_tensor(fen):
@@ -22,12 +22,10 @@ def fen_to_tensor(fen):
 
     x[idx] = 1
 
-  x[768] = float(board.turn)
-
-  x[769] = board.has_kingside_castling_rights(chess.BLACK)
-  x[770] = board.has_queenside_castling_rights(chess.BLACK)
-  x[771] = board.has_kingside_castling_rights(chess.WHITE)
-  x[772] = board.has_queenside_castling_rights(chess.WHITE)
+  x[INPUT - 4] = board.has_kingside_castling_rights(chess.BLACK)
+  x[INPUT - 3] = board.has_queenside_castling_rights(chess.BLACK)
+  x[INPUT - 2] = board.has_kingside_castling_rights(chess.WHITE)
+  x[INPUT - 1] = board.has_queenside_castling_rights(chess.WHITE)
 
   return x
 

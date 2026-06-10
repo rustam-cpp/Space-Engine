@@ -40,7 +40,7 @@ def eval_batch(fens):
         chess.engine.Limit(nodes=NODES_LIMIT)
       )
 
-      score_obj = info["score"].relative
+      score_obj = info["score"].white()
       score = score_obj.score(mate_score=30000)
 
       if score is None:

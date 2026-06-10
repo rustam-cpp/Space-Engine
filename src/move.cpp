@@ -138,12 +138,6 @@ void doMove(Position* pos, const Move& move, rt* RT) {
   // 4.1 update fullmove clock
   if (!pos->WhiteToMove) pos->FullmoveClock++;
 
-  if (pos->WhiteToMove) {
-    delFeature(pos->acc, pos->nnue, INPUT - 5);
-  } else {
-    addFeature(pos->acc, pos->nnue, INPUT - 5);
-  }
-
   pos->ZobristHash ^= pos->WhiteToMove << 4;
   pos->WhiteToMove = !pos->WhiteToMove;
   pos->ZobristHash ^= pos->WhiteToMove << 4;
@@ -208,12 +202,6 @@ void undoMove(Position* pos, const Move& move, rt* RT) {
 
   if (pos->WhiteToMove) pos->FullmoveClock--;
 
-  if (pos->WhiteToMove) {
-    delFeature(pos->acc, pos->nnue, INPUT - 5);
-  } else {
-    addFeature(pos->acc, pos->nnue, INPUT - 5);
-  }
-
   pos->WhiteToMove = !pos->WhiteToMove;
 
   pos->ZobristHash = RT->stack.back();
@@ -227,12 +215,6 @@ void doNullMove(Position* pos, rt* RT) {
   pos->ZobristHash ^= pos->EnPassantSquare << 12;
 
   if (!pos->WhiteToMove) pos->FullmoveClock++;
-
-  if (pos->WhiteToMove) {
-    delFeature(pos->acc, pos->nnue, INPUT - 5);
-  } else {
-    addFeature(pos->acc, pos->nnue, INPUT - 5);
-  }
 
   pos->ZobristHash ^= pos->WhiteToMove << 4;
   pos->WhiteToMove = !pos->WhiteToMove;
@@ -251,12 +233,6 @@ void undoNullMove(Position* pos, rt* RT) {
   pos->HalfmoveClock--;
 
   if (pos->WhiteToMove) pos->FullmoveClock--;
-
-  if (pos->WhiteToMove) {
-    delFeature(pos->acc, pos->nnue, INPUT - 5);
-  } else {
-    addFeature(pos->acc, pos->nnue, INPUT - 5);
-  }
 
   pos->WhiteToMove = !pos->WhiteToMove;
 

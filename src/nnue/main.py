@@ -3,7 +3,7 @@ import torch.nn as nn
 from tqdm import tqdm
 import time
 
-INPUT = 773
+INPUT = 772
 HIDDEN = 128
 
 
@@ -45,7 +45,7 @@ def train():
   X_val, Y_val = X[split:], Y[split:]
 
   batch_size = 16384
-  epochs = 50
+  epochs = 1000
 
   for epoch in range(epochs):
     model.train()

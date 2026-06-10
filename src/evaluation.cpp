@@ -238,5 +238,6 @@ Eval evalBishopPair(const Position* pos) {
 // }
 
 Eval evaluation(const Position* pos) {
-  return evaluate(pos->acc, pos->nnue) * 1000;
+  int mul = (pos->WhiteToMove ? 1000 : -1000);
+  return evaluate(pos->acc, pos->nnue) * mul;
 }
