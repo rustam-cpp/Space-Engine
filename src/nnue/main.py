@@ -45,7 +45,7 @@ def train():
   X_val, Y_val = X[split:], Y[split:]
 
   batch_size = 16384
-  epochs = 1000
+  epochs = 100000
 
   for epoch in range(epochs):
     model.train()
@@ -81,8 +81,8 @@ def train():
       speed = seen / elapsed if elapsed > 0 else 0
 
       pbar.set_postfix(
-        loss=f"{loss.item():.4f}",
-        avg_loss=f"{total_loss / seen:.4f}",
+        loss=f"{loss.item():.6f}",
+        avg_loss=f"{total_loss / seen:.6f}",
         speed=f"{speed:.0f} samp/s"
       )
 
@@ -94,8 +94,8 @@ def train():
       val_loss = loss_fn(val_pred, Y_val).item()
 
     print(f"\nEpoch {epoch} done")
-    print(f"train_loss={total_loss:.4f}")
-    print(f"val_loss={val_loss:.4f}")
+    print(f"train_loss={total_loss:.6f}")
+    print(f"val_loss={val_loss:.6f}")
 
     torch.save(model.state_dict(), "nnue.pt")
     print("saved nnue.pt\n")
