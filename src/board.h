@@ -1,5 +1,6 @@
 #pragma once
 
+#include "nnue.h"
 #include "types.h"
 #include "constants.h"
 #include "rt.h"
@@ -43,6 +44,7 @@ constexpr uint64_t Zobrist[32][64] = {
 };
 
 struct Position {
+
   Position() {
     // we need this to avoid UB (undefined behavior)
     std::fill(pieces, pieces + 32, 0);
@@ -51,29 +53,44 @@ struct Position {
     BlackPieces = 0;
     Castlings = 0;
   }
+
   // for fast getPiece function
   Piece board[64];
   // for fast operations, which can be implemented with bits operations
   Bitboard pieces[32];
+
   // all white and black pieces in 2 bitboards
   Bitboard WhitePieces, BlackPieces;
+
   bool WhiteToMove; // who moves, white?
+
   CastlingMask Castlings;
+
   int HalfmoveClock; // move count
   int FullmoveClock; // for fifty-move rule
+
   Square EnPassantSquare;
+
   // functions for easy-work with board
   void setPiece(Square S, Piece P);
   void resetPiece(Square S, Piece P);
   Piece getPiece(Square S) const;
+
   // function for tests and uci
   void convertFromFen(std::string FEN, rt* RT);
+
   // with Zobrist hash we can convert position on the board to a single 
   // 64-bit number. with them we can work faster with transposition table
   uint64_t ZobristHash;
+
+  // for NNUE evaluation
+  Accumulator acc;
+  const Network* nnue;
+
   uint64_t getZobristHash() const;
   bool isFiftyMoveDraw() const;
   bool isRepetitionDraw(rt* RT);
+
 };
 
 std::ostream& operator<<(std::ostream& out, Position& P);

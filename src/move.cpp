@@ -1,5 +1,6 @@
 #include "move.h"
 #include "converts.h"
+#include "nnue.h"
 #include "types.h"
 
 // builds struct Move from position and givven start and
@@ -61,7 +62,9 @@ void doMove(Position* pos, const Move& move, rt* RT) {
       // set moved piece to move.To
       pos->setPiece(move.To, move.Moved);
   }
-  
+
+  CastlingMask was = pos->Castlings;
+
   pos->ZobristHash ^= pos->Castlings;
   // 2. change castling availability if rook moved
   if (getType(move.Moved) == ROOK) {
@@ -107,6 +110,18 @@ void doMove(Position* pos, const Move& move, rt* RT) {
     }
   }
   pos->ZobristHash ^= pos->Castlings;
+
+  CastlingMask now = pos->Castlings;
+
+  for (char c : "kqKQ") {
+    if (getCastlingAvailability(was, c) &&
+        !getCastlingAvailability(now, c)) {
+      if (c == 'k') delFeature(pos->acc, pos->nnue, INPUT - 4);
+      if (c == 'q') delFeature(pos->acc, pos->nnue, INPUT - 3);
+      if (c == 'K') delFeature(pos->acc, pos->nnue, INPUT - 2);
+      if (c == 'Q') delFeature(pos->acc, pos->nnue, INPUT - 1);
+    }
+  }
 
   pos->ZobristHash ^= pos->EnPassantSquare << 12;
   pos->EnPassantSquare = -1;
@@ -167,6 +182,19 @@ void undoMove(Position* pos, const Move& move, rt* RT) {
   }
   // reset other values
   pos->EnPassantSquare = move.EnPassantSquare;
+
+  CastlingMask was = pos->Castlings;
+  CastlingMask now = move.Mask;
+
+  for (char c : "kqKQ") {
+    if (!getCastlingAvailability(was, c) &&
+        getCastlingAvailability(now, c)) {
+      if (c == 'k') addFeature(pos->acc, pos->nnue, INPUT - 4);
+      if (c == 'q') addFeature(pos->acc, pos->nnue, INPUT - 3);
+      if (c == 'K') addFeature(pos->acc, pos->nnue, INPUT - 2);
+      if (c == 'Q') addFeature(pos->acc, pos->nnue, INPUT - 1);
+    }
+  }
 
   pos->Castlings = move.Mask;
 

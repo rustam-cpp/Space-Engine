@@ -18,16 +18,7 @@ I write a pretty strange move generation:
 So, it's a pretty fast move generation function, because I use many bit manipulation functions, but it can be improved
 
 ### Evaluation
-- Material evaluation
-- Pawn structure evaluation should be pretty fast, because I use bit manipulations:
-	- bonus for passed pawns depending on their rank
-	- bonus for protected passed pawns
-	- penalty for isolated pawns
-	- penalty for doubled pawns
-- Piece square tables
-- Pawn and king in the endgame evaluation with a smooth transition from opening/middlegame to endgame
-- King protection (pawn shield)
-- Bishop pair bonus
+- NNUE
 
 ### Search
 - Quiescence search

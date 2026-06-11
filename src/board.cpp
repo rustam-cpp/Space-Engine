@@ -1,5 +1,6 @@
 #include "board.h"
 #include "converts.h"
+#include "nnue.h"
 #include <iostream>
 
 void Position::resetPiece(Square S, Piece P) {
@@ -11,6 +12,8 @@ void Position::resetPiece(Square S, Piece P) {
   else
     BlackPieces &= ~(1ULL << S);
   pieces[P] &= ~(1ULL << S);
+
+  delFeature(acc, nnue, featureIndex(P, S));
 }
 
 void Position::setPiece(Square S, Piece P) {
@@ -27,6 +30,8 @@ void Position::setPiece(Square S, Piece P) {
   else
     BlackPieces |= (1ULL << S);
   pieces[P] |= (1ULL << S);
+
+  addFeature(acc, nnue, featureIndex(P, S));
 }
 
 Piece Position::getPiece(Square S) const {
@@ -41,6 +46,8 @@ void Position::convertFromFen(std::string FEN, rt* RT) {
   WhitePieces = 0;
   BlackPieces = 0;
   Castlings = 0;
+
+  initAccumulator(acc, nnue, *this);
 
   // Pointer to symbols in FEN string
   int i = 0;
@@ -71,9 +78,9 @@ void Position::convertFromFen(std::string FEN, rt* RT) {
   i++;
   
   // 2. Side to move
-  if (FEN[i] == 'w')
+  if (FEN[i] == 'w') {
     WhiteToMove = true;
-  else
+  } else
     WhiteToMove = false;
 
   // move to the next character and space skip in one line
@@ -82,6 +89,10 @@ void Position::convertFromFen(std::string FEN, rt* RT) {
   // 3. Castling availability
   while (FEN[i] != ' ') {
     addCastlingAvailability(Castlings, FEN[i]);
+    if (FEN[i] == 'k') addFeature(acc, nnue, INPUT - 4);
+    if (FEN[i] == 'q') addFeature(acc, nnue, INPUT - 3);
+    if (FEN[i] == 'K') addFeature(acc, nnue, INPUT - 2);
+    if (FEN[i] == 'Q') addFeature(acc, nnue, INPUT - 1);
     i++;
   }
 
