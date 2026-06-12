@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
       std::cout << evaluation(pos) << '\n';
     } else if (command == "d") {
       // debug command
-      std::cout << std::endl << pos << std::endl;
+      std::cout << std::endl << (*pos) << std::endl;
     } else {
       std::cout << "Unsupported command / invalid UCI command" << std::endl;
     }
