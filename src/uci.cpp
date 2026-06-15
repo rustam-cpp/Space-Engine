@@ -122,15 +122,14 @@ void processBenchCommand(Position* pos) {
   delete tempRT;
 }
 
-void processPerftTestCommand() {
-  Position* Pos = new Position;
+void processPerftTestCommand(Position* pos, bool BIG) {
   rt* tempRT = new rt;
   int passed = 0;
   int failed = 0;
   int tn = 0;
-  for (auto [fen, d, ans] : perftPositions) {
-    Pos->convertFromFen(fen, tempRT);
-    int64_t res = perft(d, d, Pos, tempRT);
+  for (auto [fen, d, ans] : (BIG ? bigPerftPositions : perftPositions)) {
+    pos->convertFromFen(fen, tempRT);
+    int64_t res = perft(d, d, pos, tempRT);
     if (res == ans) {
       passed++;
       std::cout << "Test " << ++tn << " passed!" << std::endl;

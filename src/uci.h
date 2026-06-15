@@ -18,4 +18,4 @@ void processGoCommand(Position* pos, tt* TT, rt* RT, std::string command);
 
 void processBenchCommand(Position* pos);
 
-void processPerftTestCommand();
+void processPerftTestCommand(Position* pos, bool BIG);

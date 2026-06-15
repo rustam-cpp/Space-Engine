@@ -30,7 +30,9 @@ int64_t perft(Depth init, Depth depth, Position* pos, rt* RT) {
     doMove(pos, move, RT);
     // do it recursively
     int64_t cur = perft(init, depth - 1, pos, RT);
+    // update answer
     ans += cur;
+    // debug output
     if (depth == init) {
       std::cout << convertMoveToString(move);
       std::cout << ": " << cur << std::endl;
@@ -38,6 +40,7 @@ int64_t perft(Depth init, Depth depth, Position* pos, rt* RT) {
     // undo move
     undoMove(pos, move, RT);
   }
+  // debug output
   if (depth == init) {
     std::cout << "nodes: " << ans << std::endl;
   }
