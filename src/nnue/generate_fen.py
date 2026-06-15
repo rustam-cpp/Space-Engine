@@ -6,7 +6,7 @@ import random
 from tqdm import tqdm
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
-INPUT   = "dataset/lichess_db_standard_rated_2014-01.pgn"
+INPUT   = "dataset/lichess_db_standard_rated_2016-03.pgn"
 OUTPUT  = "dataset/fen.txt"
 THREADS = 8
 CHUNK_GAMES = 2000

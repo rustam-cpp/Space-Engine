@@ -11,7 +11,7 @@ OUTPUT = "dataset/dataset.txt"
 BATCH_SIZE = 800
 WORKERS = 8
 
-NODES_LIMIT = 800
+NODES = 800
 
 engine = None
 
@@ -37,7 +37,7 @@ def eval_batch(fens):
 
       info = local_engine.analyse(
         board,
-        chess.engine.Limit(nodes=NODES_LIMIT)
+        chess.engine.Limit(nodes=NODES)
       )
 
       score_obj = info["score"].white()
