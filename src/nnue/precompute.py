@@ -8,7 +8,7 @@ INPUT = 772
 
 def fen_to_tensor(fen):
   board = chess.Board(fen)
-  x = torch.zeros(INPUT)
+  x = torch.zeros(INPUT, dtype=torch.bool)
 
   pieces = board.piece_map()
 
@@ -34,10 +34,11 @@ def main():
   with open("dataset/dataset.txt") as f:
     lines = f.readlines()
 
-  X = []
-  Y = []
+  n = len(lines)
+  print(f"Total samples: {n}")
 
-  print(f"Total samples: {len(lines)}")
+  X = torch.zeros((n, INPUT), dtype=torch.bool)
+  Y = torch.zeros((n, 1), dtype=torch.float32)
 
   start = time.time()
 
@@ -46,15 +47,14 @@ def main():
   for i, line in enumerate(pbar):
     fen, score = line.strip().split("|")
 
-    X.append(fen_to_tensor(fen))
-    Y.append(float(score) / 1000.0)
+    X[i] = fen_to_tensor(fen)
+    Y[i, 0] = float(score) / 1000.0
 
     if i % 1000 == 0 and i > 0:
       speed = i / (time.time() - start)
       pbar.set_postfix(speed=f"{speed:.1f} fen/s")
 
-  X = torch.stack(X)
-  Y = torch.tensor(Y).unsqueeze(1)
+  del lines
 
   print("Saving tensors...")
 

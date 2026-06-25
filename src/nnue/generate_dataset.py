@@ -8,7 +8,7 @@ STOCKFISH_PATH = "stockfish"
 INPUT = "dataset/fen.txt"
 OUTPUT = "dataset/dataset.txt"
 
-BATCH_SIZE = 800
+BATCH_SIZE = 8000
 WORKERS = 8
 
 NODES = 800

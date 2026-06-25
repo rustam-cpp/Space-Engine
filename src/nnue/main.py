@@ -64,7 +64,7 @@ def train():
     for i in pbar:
       batch_idx = idx[i:i+batch_size]
 
-      x_batch = X_train[batch_idx]
+      x_batch = X_train[batch_idx].float()
       y_batch = Y_train[batch_idx]
 
       pred = model(x_batch)
@@ -90,7 +90,7 @@ def train():
 
     model.eval()
     with torch.no_grad():
-      val_pred = model(X_val)
+      val_pred = model(X_val.float())
       val_loss = loss_fn(val_pred, Y_val).item()
 
     print(f"\nEpoch {epoch} done")
