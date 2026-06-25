@@ -125,7 +125,8 @@ inline bool getCastlingAvailability(CastlingMask& cm, char a) {
   if (a == 'k') return (cm & 1) != 0;
   else if (a == 'q') return (cm & 2) != 0;
   else if (a == 'K') return (cm & 4) != 0;
-  else return (cm & 8) != 0;
+  else if (a == 'Q') return (cm & 8) != 0;
+  return false;
 }
 
 // prints bitboard in human understandable
