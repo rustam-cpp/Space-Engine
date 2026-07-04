@@ -60,6 +60,7 @@ int main(int argc, char* argv[]) {
       std::cout << "id author rustam-cpp\n";
       std::cout << "option name Hash type spin default 256 min 1 max 1024\n";
       std::cout << "option name Threads type spin default 1 min 1 max 1\n";
+      std::cout << "option name Clear Hash type button\n";
       std::cout << "uciok" << std::endl;
     } else if (command == "isready") {
       std::cout << "readyok" << std::endl;
@@ -88,6 +89,8 @@ int main(int argc, char* argv[]) {
       TT = new tt(std::stoi(cmd[4]));
     } else if (command.substr(0, 28) == "setoption name Threads value") {
       std::cout << "option name Threads type spin default 1 min 1 max 1" << std::endl;
+    } else if (command == "setoption name Clear Hash") {
+      TT->clear();
     } else if (command == "quit") {
       break;
     } else if (command == "eval") {
