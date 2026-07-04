@@ -51,7 +51,8 @@ const std::vector<std::tuple<std::string, Depth, int64_t>> perftPositions = {
   {"r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1", 4, 422333},
   {"rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8", 4, 2103487},
   {"r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 4, 3894594},
-  {"r3k2r/pppqbppp/5n2/n2Pp1N1/8/8/PPPPQPPP/RNB1K2R w KQkq - 0 9", 4, 2755142}
+  {"r3k2r/pppqbppp/5n2/n2Pp1N1/8/8/PPPPQPPP/RNB1K2R w KQkq - 0 9", 4, 2755142},
+  {"3r2k1/5np1/4Q2p/8/5B2/5PPK/2r4P/8 b - - 13 52", 4, 923111}
 };
 
 const std::vector<std::tuple<std::string, Depth, int64_t>> bigPerftPositions = {
@@ -61,7 +62,8 @@ const std::vector<std::tuple<std::string, Depth, int64_t>> bigPerftPositions = {
   {"r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1", 5, 15833292},
   {"rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8", 5, 89941194},
   {"r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 5, 164075551},
-  {"r3k2r/pppqbppp/5n2/n2Pp1N1/8/8/PPPPQPPP/RNB1K2R w KQkq - 0 9", 5, 105442426}
+  {"r3k2r/pppqbppp/5n2/n2Pp1N1/8/8/PPPPQPPP/RNB1K2R w KQkq - 0 9", 5, 105442426},
+  {"3r2k1/5np1/4Q2p/8/5B2/5PPK/2r4P/8 b - - 13 52", 5, 26627445}
 };
 
 constexpr Eval mvv_lva[7][7] = {
