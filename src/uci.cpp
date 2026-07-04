@@ -60,6 +60,7 @@ void processGoCommand(Position* pos, tt* TT, rt* RT, std::string command) {
   long myTime = BIG_INF, myInc = 0;
   long moveTime = BIG_INF;
   int movesToGo = 40;
+  bool infinite = false;
   std::vector<std::string> cmd = split(command);
   for (int i = 0; i < (int)cmd.size(); i++) {
     // base time
@@ -88,10 +89,20 @@ void processGoCommand(Position* pos, tt* TT, rt* RT, std::string command) {
       if ((int)cmd.size() >= i)
         moveTime = stol(cmd[i+1]);
     }
+    // moves to go
     if (cmd[i] == "movestogo") {
       if ((int)cmd.size() >= i)
         movesToGo = stoi(cmd[i+1]);
     }
+    // infinite time think
+    if (cmd[i] == "infinite") {
+      infinite = true;
+    }
+  }
+  if (infinite) {
+    moveTime = BIG_INF;
+    myTime = BIG_INF;
+    myInc = 0;
   }
   Move bestmove;
   if (moveTime == BIG_INF) {
