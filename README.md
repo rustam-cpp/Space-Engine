@@ -25,9 +25,9 @@ So, it's a pretty fast move generation function, because I use many bit manipula
 - Alpha-beta pruning
 - Iterative deepening
 - Transposition table
-- LMR
-- PVS
-- NMP
+- Principal Variation Search (PVS)
+- Null Move Pruning (NMP)
+- Late Move Reductions (LMR)
 - Check extention
 - Aspiration window
 
