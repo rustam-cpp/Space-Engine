@@ -3,7 +3,8 @@
 #include "nnue.h"
 #include <iostream>
 
-void Position::resetPiece(Square S, Piece P) {
+void Position::resetPiece(Square S) {
+  Piece P = getPiece(S);
   if (P == NONE) return;
   ZobristHash ^= Zobrist[P][S];
   board[S] = NONE;
@@ -17,13 +18,10 @@ void Position::resetPiece(Square S, Piece P) {
 }
 
 void Position::setPiece(Square S, Piece P) {
-  Piece p = getPiece(S);
-  if (p != NONE) {
-    ZobristHash ^= Zobrist[p][S];
-    resetPiece(S, p);
-  }
-  board[S] = P;
+  if (getPiece(S) != NONE)
+    resetPiece(S);
   if (P == NONE) return;
+  board[S] = P;
   ZobristHash ^= Zobrist[P][S];
   if (getColor(P) == WHITE)
     WhitePieces |= (1ULL << S);

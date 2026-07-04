@@ -72,8 +72,8 @@ struct Position {
   Square EnPassantSquare;
 
   // functions for easy-work with board
+  void resetPiece(Square S);
   void setPiece(Square S, Piece P);
-  void resetPiece(Square S, Piece P);
   Piece getPiece(Square S) const;
 
   // function for tests and uci

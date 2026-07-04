@@ -31,11 +31,11 @@ void doMove(Position* pos, const Move& move, rt* RT) {
   // 1. move Pieces
   if (move.EnPassant) {
     // move moved piece
-    pos->resetPiece(move.From, move.Moved);
+    pos->resetPiece(move.From);
     pos->setPiece(move.To, move.Moved);
     // delete eaten pawn
     Square EatenPawnSquare = move.To + (move.From < move.To ? -8 : 8);
-    pos->resetPiece(EatenPawnSquare, swapColor(move.Moved));
+    pos->resetPiece(EatenPawnSquare);
   } else if (move.Castling) {
     Square To = move.From + (move.From < move.To ? 2 : -2);
     // calculating current rook square
@@ -45,16 +45,16 @@ void doMove(Position* pos, const Move& move, rt* RT) {
     // calculating rook
     Piece Rook = makePiece(getColor(move.Moved), ROOK);
     // move rook
-    pos->resetPiece(RookSquare, Rook);
+    pos->resetPiece(RookSquare);
     pos->setPiece(newRookSquare, Rook);
     // move king
-    pos->resetPiece(move.From, move.Moved);
+    pos->resetPiece(move.From);
     pos->setPiece(To, move.Moved);
   } else {
     // move out moved piece from move.From
-    pos->resetPiece(move.From, move.Moved);
+    pos->resetPiece(move.From);
     // move out captured piece from move.To
-    pos->resetPiece(move.To, move.Captured);
+    pos->resetPiece(move.To);
     if (move.PromotedTo != NONE)
       // set promoted piece to move.To
       pos->setPiece(move.To, move.PromotedTo);
@@ -159,7 +159,7 @@ void undoMove(Position* pos, const Move& move, rt* RT) {
 
   // it's copy + paste doMove, but all is opposite
   if (move.EnPassant) {
-    pos->resetPiece(move.To, move.Moved);
+    pos->resetPiece(move.To);
     pos->setPiece(move.From, move.Moved);
     Square EatenPawnSquare = move.To + (move.From < move.To ? -8 : 8);
     pos->setPiece(EatenPawnSquare, swapColor(move.Moved));
@@ -168,15 +168,15 @@ void undoMove(Position* pos, const Move& move, rt* RT) {
     Square RookSquare = move.From + (move.From < To ? 3 : -4);
     Square newRookSquare = To + (move.From < To ? -1 : 1);
     Piece Rook = makePiece(getColor(move.Moved), ROOK);
-    pos->resetPiece(newRookSquare, Rook);
+    pos->resetPiece(newRookSquare);
     pos->setPiece(RookSquare, Rook);
-    pos->resetPiece(To, move.Moved);
+    pos->resetPiece(To);
     pos->setPiece(move.From, move.Moved);
   } else {
     if (move.PromotedTo != NONE)
-      pos->resetPiece(move.To, move.PromotedTo);
+      pos->resetPiece(move.To);
     else
-      pos->resetPiece(move.To, move.Moved);
+      pos->resetPiece(move.To);
     pos->setPiece(move.To, move.Captured);
     pos->setPiece(move.From, move.Moved);
   }

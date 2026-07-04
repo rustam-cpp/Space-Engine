@@ -33,6 +33,8 @@ offset += HIDDEN * 4
 B2 = struct.unpack_from("f", data, offset)[0]
 offset += 4
 
+SCALE = 1000
+
 with open("src/network.h", "w") as f:
     f.write("#pragma once\n\n#include \"nnue.h\"\n\nconst Network NNUE = {\n")
 
@@ -41,7 +43,7 @@ with open("src/network.h", "w") as f:
     for i in range(0, INPUT):
         f.write("\t\t{ ")
         for j in range(0, HIDDEN):
-            f.write(str(W1[i][j]))
+            f.write(str(int(W1[i][j] * SCALE)))
             if j < HIDDEN - 1:
                 f.write(", ")
         f.write(" }")
@@ -53,7 +55,7 @@ with open("src/network.h", "w") as f:
     # B1
     f.write("\t{ ")
     for i in range(0, HIDDEN):
-        f.write(str(B1[i]))
+        f.write(str(int(B1[i] * SCALE)))
         if i < INPUT - 1:
             f.write(", ")
     f.write(" },\n")
@@ -61,13 +63,13 @@ with open("src/network.h", "w") as f:
     # W2
     f.write("\t{ ")
     for i in range(0, HIDDEN):
-        f.write(str(W2[i]))
+        f.write(str(int(W2[i] * SCALE)))
         if i < INPUT - 1:
             f.write(", ")
     f.write(" },\n")
 
     # B2
-    f.write("\t"+str(B2))
+    f.write("\t"+str(int(B2 * SCALE)))
     f.write("\n")
 
     f.write("};")
