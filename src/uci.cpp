@@ -59,6 +59,7 @@ void processGoCommand(Position* pos, tt* TT, rt* RT, std::string command) {
   // base time, increment
   long myTime = BIG_INF, myInc = 0;
   long moveTime = BIG_INF;
+  int movesToGo = 40;
   std::vector<std::string> cmd = split(command);
   for (int i = 0; i < (int)cmd.size(); i++) {
     // base time
@@ -87,13 +88,17 @@ void processGoCommand(Position* pos, tt* TT, rt* RT, std::string command) {
       if ((int)cmd.size() >= i)
         moveTime = stol(cmd[i+1]);
     }
+    if (cmd[i] == "movestogo") {
+      if ((int)cmd.size() >= i)
+        movesToGo = stoi(cmd[i+1]);
+    }
   }
   Move bestmove;
   if (moveTime == BIG_INF) {
     // BestMove, Nodes
     auto [bm, n] = iterative_depening(pos, TT, RT, maxDepth,
-                   soft_bound(myTime, myInc) - 5,
-                   hard_bound(myTime, myInc) - 5);
+                   soft_bound(myTime, myInc, movesToGo) - 5,
+                   hard_bound(myTime, myInc, movesToGo) - 5);
     bestmove = bm;
   } else {
     auto [bm, n] = iterative_depening(pos, TT, RT, maxDepth,
