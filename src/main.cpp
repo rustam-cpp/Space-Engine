@@ -37,8 +37,10 @@ int main(int argc, char* argv[]) {
   // ./space bench
   if (argc == 2) {
     std::string cmd = argv[1];
-    processBenchCommand(pos);
-    return 0;
+    if (cmd == "bench") {
+      processBenchCommand(pos);
+      return 0;
+    }
   }
 
   info();
