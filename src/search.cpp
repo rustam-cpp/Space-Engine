@@ -663,7 +663,8 @@ std::pair<Move, int64_t> iterative_depening(
     et = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 
     long Time = (et - st) / 1'000'000;
-    int64_t nps = (Time > 0) ? (nodes * 1000 / Time) : 0;
+    long usTime = (et - st) / 1'000;
+    int64_t nps = (usTime > 0) ? (nodes * 1'000'000 / usTime) : 0;
 
     // UCI
 
