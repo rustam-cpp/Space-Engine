@@ -1,13 +1,15 @@
 #pragma once
 
-inline long soft_bound(long time, long inc, int movesToGo) {
+#include "types.h"
+
+inline Time soft_bound(Time time, Time inc, int movesToGo) {
   return time / (movesToGo * 7 / 4) + inc * 2 / 5;
 }
 
-inline long hard_bound(long time, long inc, int movesToGo) {
+inline Time hard_bound(Time time, Time inc, int movesToGo) {
   return time / movesToGo + inc / 2;
 }
 
-inline long soft_bound_fixed_movetime(long time) {
+inline Time soft_bound_fixed_movetime(Time time) {
   return time * 4 / 7;
 }

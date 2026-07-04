@@ -11,8 +11,8 @@
 bool is_running = false;
 bool stop = false;
 
-long st, et;
-long timeToThink;
+Time st, et;
+Time timeToThink;
 
 Move killer[MAX_PLY][2];
 int history[2][64][64];
@@ -550,7 +550,7 @@ std::pair<Move, int64_t> iterative_depening(
   Position* pos,
   tt* TT, rt* RT,
   Depth maxDepth,
-  long soft, long hard
+  Time soft, Time hard
 ) {
 
   memset(history, 0, sizeof(history));
@@ -662,9 +662,9 @@ std::pair<Move, int64_t> iterative_depening(
 
     et = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 
-    long Time = (et - st) / 1'000'000;
-    long usTime = (et - st) / 1'000;
-    int64_t nps = (usTime > 0) ? (nodes * 1'000'000 / usTime) : 0;
+    Time elapsedMs = (et - st) / 1'000'000;
+    Time elapsedUs = (et - st) / 1'000;
+    int64_t nps = (elapsedUs > 0) ? (nodes * 1'000'000 / elapsedUs) : 0;
 
     // UCI
 
@@ -673,7 +673,7 @@ std::pair<Move, int64_t> iterative_depening(
               << " nodes " << toLen(nodes, 11)
               << " nps " << toLen(nps, 9)
               << " hashfull " << toLen(TT->hashfull(), 4)
-              << " time " << toLen(Time, 8)
+              << " time " << toLen(elapsedMs, 8)
               << " score " << Score(eval)
               << " pv ";
     for (const Move& move : PV) {
@@ -684,7 +684,7 @@ std::pair<Move, int64_t> iterative_depening(
     depth++;
 
     // if we potentially will time out
-    if (Time > soft) break;
+    if (elapsedMs > soft) break;
 
   } while (depth <= maxDepth);
 

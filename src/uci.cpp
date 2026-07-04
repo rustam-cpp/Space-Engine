@@ -57,8 +57,8 @@ void processPositionCommand(Position* pos, rt* RT, std::string command) {
 void processGoCommand(Position* pos, tt* TT, rt* RT, std::string command) {
   Depth maxDepth = MAX_PLY;
   // base time, increment
-  long myTime = BIG_INF, myInc = 0;
-  long moveTime = BIG_INF;
+  Time myTime = BIG_INF, myInc = 0;
+  Time moveTime = BIG_INF;
   int movesToGo = 40;
   bool infinite = false;
   std::vector<std::string> cmd = split(command);
@@ -124,16 +124,16 @@ void processBenchCommand(Position* pos) {
   tt* tempTT = new tt(8);
   rt* tempRT = new rt;
   int64_t nodes = 0;
-  long start = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+  Time start = std::chrono::high_resolution_clock::now().time_since_epoch().count();
   for (const auto& [fen, depth] : benchPositions) {
     tempTT->clear();
     tempRT->clear();
     pos->convertFromFen(fen, tempRT);
     nodes += iterative_depening(pos, tempTT, tempRT, depth, BIG_INF, BIG_INF).second;
   }
-  long end = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-  long Time = (end - start) / 1'000'000;
-  std::cout << nodes << " nodes " << (Time > 0 ? nodes * 1000 / Time : 0) << " nps" << std::endl;
+  Time end = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+  Time elapsed = (end - start) / 1'000'000;
+  std::cout << nodes << " nodes " << (elapsed > 0 ? nodes * 1000 / elapsed : 0) << " nps" << std::endl;
   delete tempTT;
   delete tempRT;
 }

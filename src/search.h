@@ -58,7 +58,7 @@ std::pair<Move, int64_t> iterative_depening(
   Position* pos,
   tt* TT, rt* RT,
   Depth maxDepth,
-  long soft, long hard
+  Time soft, Time hard
 );
 
 // stops search when "stop" command received

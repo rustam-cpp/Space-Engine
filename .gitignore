@@ -10,6 +10,7 @@ space
 base
 dev
 test
+*.exe
 
 # Dataset
 dataset
