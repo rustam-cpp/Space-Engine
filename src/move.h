@@ -9,7 +9,7 @@ struct Move {
     Moved = NONE, Captured = NONE, PromotedTo = NONE;
     Mask = 0;
     Castling = false; EnPassant = false;
-    EnPassantSquare = 0;
+    EnPassantSquare = -1;
     HalfmoveClock = 0;
   }
   // Move info
