@@ -22,25 +22,25 @@ constexpr int HIDDEN = 128;
 struct Network {
 
   // input
-  float W1[INPUT][HIDDEN];
-  float B1[HIDDEN];
+  int16_t W1[INPUT][HIDDEN];
+  int16_t B1[HIDDEN];
 
   // hidden layer
-  float W2[HIDDEN];
-  float B2;
+  int16_t W2[HIDDEN];
+  int16_t B2;
 
 };
 
 struct Accumulator {
 
-  float hidden[HIDDEN];
+  int32_t hidden[HIDDEN];
 
 };
 
 struct Position;
 
 inline void addFeature(Accumulator& acc, const Network* nnue, int featureIdx) {
-  float* h = acc.hidden;
+  int32_t* h = acc.hidden;
 
   for (int i = 0; i < HIDDEN; i++) {
     h[i] += nnue->W1[featureIdx][i];
@@ -48,7 +48,7 @@ inline void addFeature(Accumulator& acc, const Network* nnue, int featureIdx) {
 }
 
 inline void delFeature(Accumulator& acc, const Network* nnue, int featureIdx) {
-  float* h = acc.hidden;
+  int32_t* h = acc.hidden;
 
   for (int i = 0; i < HIDDEN; i++) {
     h[i] -= nnue->W1[featureIdx][i];
@@ -57,15 +57,15 @@ inline void delFeature(Accumulator& acc, const Network* nnue, int featureIdx) {
 
 void initAccumulator(Accumulator& acc, const Network* nnue, const Position& pos);
 
-inline float evaluate(const Accumulator& acc, const Network* nnue) {
-  const float* h = acc.hidden;
+inline int32_t evaluate(const Accumulator& acc, const Network* nnue) {
+  const int32_t* h = acc.hidden;
 
-  float eval = nnue->B2;
+  int32_t eval = nnue->B2;
 
   for (int i = 0; i < HIDDEN; i++) {
-    float x = h[i];
+    int16_t x = h[i];
 
-    x = std::max(x, 0.0f);
+    if (x < 0) x = 0;
 
     eval += x * nnue->W2[i];
   }
