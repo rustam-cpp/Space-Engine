@@ -7,18 +7,37 @@ Space is a UCI chess engine written in C++. It plays only standard chess. You ca
 ## Details
 
 ### Move Generation
-I write a pretty strange move generation:
 
-- precalculated masks for kings and knights
-- the O(1) calculations for pawns
-- the O(1) calculations for bishops, rooks and queens, but they're heavy
-- the O(1) function to check if there is check on the board.
-- if we need to check if there are legal moves in the position, we can generate only 1 move (if it's exist)
+Space uses a custom bitboard move generator featuring:
 
-So, it's a pretty fast move generation function, because I use many bit manipulation functions, but it can be improved
+- Precomputed attack masks for kings and knights
+- Constant-time pawn attack generation
+- Constant-time sliding piece attack generation
+- Efficient in-check detection
+- Early termination when only the existence of a legal move is required
+
+The move generator is heavily based on bit manipulation and is designed to generate legal moves as efficiently as possible.
 
 ### Evaluation
-- NNUE
+
+Current versions of Space use a lightweight NNUE network with the following architecture:
+
+```
+772 -> 128 -> 1
+```
+
+Earlier versions of Space used a handcrafted evaluation including:
+
+- Material evaluation
+- Pawn structure evaluation
+  - Passed pawns
+  - Protected passed pawns
+  - Isolated pawns
+  - Doubled pawns
+- Piece-square tables
+- Smooth opening/endgame king evaluation
+- King safety (pawn shield)
+- Bishop pair bonus
 
 ### Search
 - Quiescence search
