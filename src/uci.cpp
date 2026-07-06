@@ -108,13 +108,13 @@ void processGoCommand(Position* pos, tt* TT, rt* RT, std::string command) {
   if (moveTime == BIG_INF) {
     // BestMove, Nodes
     auto [bm, n] = iterative_depening(pos, TT, RT, maxDepth,
-                   soft_bound(myTime, myInc, movesToGo) - 5,
-                   hard_bound(myTime, myInc, movesToGo) - 5);
+                   soft_bound(myTime, myInc, movesToGo) - 1,
+                   hard_bound(myTime, myInc, movesToGo) - 1);
     bestmove = bm;
   } else {
     auto [bm, n] = iterative_depening(pos, TT, RT, maxDepth,
-                   soft_bound_fixed_movetime(moveTime) - 5,
-                   moveTime - 5);
+                   soft_bound_fixed_movetime(moveTime) - 1,
+                   moveTime - 1);
     bestmove = bm;
   }
   std::cout << "bestmove " << convertMoveToString(bestmove) << std::endl;
