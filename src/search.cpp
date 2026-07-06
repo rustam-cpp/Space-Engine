@@ -254,8 +254,10 @@ Eval search(
   }
 
   // if there is a draw on the board, then you need to return 0
-  if (pos->isRepetitionDraw(RT) || pos->isFiftyMoveDraw())
+  if (pos->isRepetitionDraw(RT) || pos->isFiftyMoveDraw()) {
+    pv.clear();
     return 0;
+  }
 
   // if we can use TT
   TTentry* entry = TT->probe(pos->ZobristHash);
@@ -308,6 +310,7 @@ Eval search(
   generateMoves<false, false>(pos, moves, RT);
 
   if (moves.empty()) {
+    pv.clear();
     if (isCheck)
       // checkmate on the board
       return -Mate + ply;
