@@ -509,6 +509,8 @@ Eval search(
   if (sE < -Mate + 1000)
     sE -= ply;
 
+  assert(pv.empty() || pv.front() == bestMove || ply > 0);
+
   TT->store(pos->ZobristHash, depth, sE, flag, bestMove);
 
   return Best;
